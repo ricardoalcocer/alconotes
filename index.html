@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; script-src 'self'" />
+    <title>Untitled</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="titlebar-drag"></div>
+      <main id="workspace" class="view-split">
+        <section id="editor-pane">
+          <div id="editor"></div>
+        </section>
+        <div id="divider"></div>
+        <section id="preview-pane">
+          <article id="preview" class="markdown-body"></article>
+        </section>
+      </main>
+      <footer id="statusbar">
+        <span id="status-cursor">Ln 1, Col 1</span>
+        <span class="sep">·</span>
+        <span id="status-sel">0 selected</span>
+        <span class="spacer"></span>
+        <span id="status-words">0 words</span>
+        <span class="sep">·</span>
+        <span id="status-chars">0 chars</span>
+        <span class="sep">·</span>
+        <span id="status-eol">LF</span>
+        <button id="toggle-preview" type="button" title="Toggle Preview (⌘⇧P)" aria-pressed="false">
+          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
+            <path fill="currentColor" d="M8 3C4.5 3 1.7 5.1.6 8c1.1 2.9 3.9 5 7.4 5s6.3-2.1 7.4-5C14.3 5.1 11.5 3 8 3Zm0 8.3A3.3 3.3 0 1 1 8 4.7a3.3 3.3 0 0 1 0 6.6Zm0-5.3A2 2 0 1 0 8 10a2 2 0 0 0 0-4Z"/>
+          </svg>
+          <span>Preview</span>
+        </button>
+      </footer>
+    </div>
+    <script src="dist/renderer.js"></script>
+  </body>
+</html>
