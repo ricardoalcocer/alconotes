@@ -297,6 +297,7 @@ function buildMenu() {
         { label: 'Italic', accelerator: 'CmdOrCtrl+I', click: () => sendToFocused('menu:format', 'italic') },
         { label: 'Inline Code', accelerator: 'CmdOrCtrl+K', click: () => sendToFocused('menu:format', 'code') },
         { label: 'Link', accelerator: 'CmdOrCtrl+Shift+K', click: () => sendToFocused('menu:format', 'link') },
+        { label: 'Image', accelerator: 'CmdOrCtrl+Shift+I', click: () => sendToFocused('menu:format', 'image') },
         { type: 'separator' },
         { label: 'Heading 1', accelerator: 'CmdOrCtrl+1', click: () => sendToFocused('menu:format', 'h1') },
         { label: 'Heading 2', accelerator: 'CmdOrCtrl+2', click: () => sendToFocused('menu:format', 'h2') },

@@ -54,7 +54,7 @@ left off.
 | 🌗 **Native & theme-aware** | Hidden-inset title bar, system fonts, and automatic light/dark that follows macOS. |
 | 💾 **Save only if you want** | `⌘S` / Save As exports a `.md` copy without disturbing your notebook. `⌘N` opens a throwaway doc; `⌘O` opens any file. |
 | 🔎 **Find & Replace** | `⌘F` / `⌘⌥F` powered by CodeMirror's search. |
-| 🔠 **Formatting shortcuts** | Bold, italic, code, links, headings, lists & blockquotes — all one keystroke away. |
+| 🔠 **Toolbar & shortcuts** | Bold, italic, code, links, images, headings, lists & blockquotes — one click on the toolbar or one keystroke away. |
 | 📊 **Live status bar** | Line/column, selection length, word count & character count. |
 
 ## 📥 Get it
@@ -117,7 +117,7 @@ so it survives quits without a save.
 | Find | `⌘F` | | Inline Code / Link | `⌘K` / `⌘⇧K` |
 | Replace | `⌘⌥F` | | Heading 1–3 | `⌘1` · `⌘2` · `⌘3` |
 | Bulleted list | `⌘⇧8` | | Numbered list | `⌘⇧7` |
-| Blockquote | `⌘⇧.` | | | |
+| Blockquote | `⌘⇧.` | | Image | `⌘⇧I` |
 
 ## 🧱 How it's built
 

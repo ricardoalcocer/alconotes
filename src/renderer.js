@@ -397,12 +397,27 @@ function insertLink() {
   view.focus();
 }
 
+function insertImage() {
+  const state = view.state;
+  const r = state.selection.main;
+  const alt = state.doc.sliceString(r.from, r.to) || 'alt text';
+  const insert = `![${alt}](url)`;
+  view.dispatch({
+    changes: { from: r.from, to: r.to, insert },
+    // Select the "url" placeholder for quick typing.
+    selection: { anchor: r.from + alt.length + 4, head: r.from + alt.length + 7 },
+    scrollIntoView: true,
+  });
+  view.focus();
+}
+
 function applyFormat(kind) {
   switch (kind) {
     case 'bold': return wrapSelection('**');
     case 'italic': return wrapSelection('*');
     case 'code': return wrapSelection('`');
     case 'link': return insertLink();
+    case 'image': return insertImage();
     case 'h1': return setHeading(1);
     case 'h2': return setHeading(2);
     case 'h3': return setHeading(3);
@@ -437,6 +452,12 @@ function togglePreview() {
 }
 
 if (previewBtn) previewBtn.addEventListener('click', () => togglePreview());
+
+// Formatting toolbar — mousedown is prevented so the editor keeps focus/selection.
+document.querySelectorAll('#toolbar button[data-format]').forEach((btn) => {
+  btn.addEventListener('mousedown', (e) => e.preventDefault());
+  btn.addEventListener('click', () => applyFormat(btn.dataset.format));
+});
 
 function toggleLineNumbers() {
   showLineNumbers = !showLineNumbers;
