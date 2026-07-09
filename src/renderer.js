@@ -411,6 +411,24 @@ function insertImage() {
   view.focus();
 }
 
+// Insert a Markdown table skeleton. `rows` includes the header row.
+function insertTable(rows, cols) {
+  const state = view.state;
+  const line = state.doc.lineAt(state.selection.main.from);
+  const blank = line.text.trim().length === 0;
+  const row = '|' + Array(cols).fill('   ').join('|') + '|';
+  const sep = '|' + Array(cols).fill(' --- ').join('|') + '|';
+  const table = [row, sep, ...Array(Math.max(rows - 1, 0)).fill(row)].join('\n');
+  const before = blank ? '' : '\n\n';
+  view.dispatch({
+    changes: { from: blank ? line.from : line.to, to: line.to, insert: before + table + '\n' },
+    // Caret inside the first header cell.
+    selection: { anchor: (blank ? line.from : line.to) + before.length + 2 },
+    scrollIntoView: true,
+  });
+  view.focus();
+}
+
 function applyFormat(kind) {
   switch (kind) {
     case 'bold': return wrapSelection('**');
@@ -418,6 +436,7 @@ function applyFormat(kind) {
     case 'code': return wrapSelection('`');
     case 'link': return insertLink();
     case 'image': return insertImage();
+    case 'table': return toggleTablePicker();
     case 'h1': return setHeading(1);
     case 'h2': return setHeading(2);
     case 'h3': return setHeading(3);
@@ -457,6 +476,68 @@ if (previewBtn) previewBtn.addEventListener('click', () => togglePreview());
 document.querySelectorAll('#toolbar button[data-format]').forEach((btn) => {
   btn.addEventListener('mousedown', (e) => e.preventDefault());
   btn.addEventListener('click', () => applyFormat(btn.dataset.format));
+});
+
+// ---- Insert-table grid picker (Word-style rows × columns hover grid) ----
+const tableBtn = document.getElementById('tb-table');
+const tablePicker = document.getElementById('table-picker');
+const tablePickerGrid = document.getElementById('table-picker-grid');
+const tablePickerLabel = document.getElementById('table-picker-label');
+const PICKER_COLS = 10;
+const PICKER_ROWS = 8;
+
+for (let r = 1; r <= PICKER_ROWS; r++) {
+  for (let c = 1; c <= PICKER_COLS; c++) {
+    const cell = document.createElement('div');
+    cell.className = 'tp-cell';
+    cell.dataset.r = String(r);
+    cell.dataset.c = String(c);
+    tablePickerGrid.appendChild(cell);
+  }
+}
+
+function highlightPicker(rows, cols) {
+  for (const cell of tablePickerGrid.children) {
+    cell.classList.toggle('on', +cell.dataset.r <= rows && +cell.dataset.c <= cols);
+  }
+  tablePickerLabel.textContent = rows && cols ? `${cols} × ${rows}` : 'Insert table';
+}
+
+function showTablePicker() {
+  tablePicker.style.left = `${tableBtn.offsetLeft}px`;
+  tablePicker.hidden = false;
+  tableBtn.setAttribute('aria-expanded', 'true');
+  highlightPicker(0, 0);
+}
+function hideTablePicker() {
+  tablePicker.hidden = true;
+  tableBtn.setAttribute('aria-expanded', 'false');
+}
+function toggleTablePicker() {
+  if (tablePicker.hidden) showTablePicker();
+  else hideTablePicker();
+}
+
+tableBtn.addEventListener('mousedown', (e) => e.preventDefault());
+tableBtn.addEventListener('click', toggleTablePicker);
+tablePickerGrid.addEventListener('mouseover', (e) => {
+  const cell = e.target.closest('.tp-cell');
+  if (cell) highlightPicker(+cell.dataset.r, +cell.dataset.c);
+});
+tablePickerGrid.addEventListener('mouseleave', () => highlightPicker(0, 0));
+tablePickerGrid.addEventListener('click', (e) => {
+  const cell = e.target.closest('.tp-cell');
+  if (!cell) return;
+  hideTablePicker();
+  insertTable(+cell.dataset.r, +cell.dataset.c);
+});
+document.addEventListener('mousedown', (e) => {
+  if (!tablePicker.hidden && !tablePicker.contains(e.target) && !tableBtn.contains(e.target)) {
+    hideTablePicker();
+  }
+});
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !tablePicker.hidden) hideTablePicker();
 });
 
 function toggleLineNumbers() {

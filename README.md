@@ -124,6 +124,7 @@ so it survives quits without a save.
 | Replace | `⌘⌥F` | | Heading 1–3 | `⌘1` · `⌘2` · `⌘3` |
 | Bulleted list | `⌘⇧8` | | Numbered list | `⌘⇧7` |
 | Blockquote | `⌘⇧.` | | Image | `⌘⇧I` |
+| Table | `⌘⇧T` | | | |
 
 ## 🧱 How it's built
 

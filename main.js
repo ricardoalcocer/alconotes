@@ -300,6 +300,7 @@ function buildMenu() {
         { label: 'Inline Code', accelerator: 'CmdOrCtrl+K', click: () => sendToFocused('menu:format', 'code') },
         { label: 'Link', accelerator: 'CmdOrCtrl+Shift+K', click: () => sendToFocused('menu:format', 'link') },
         { label: 'Image', accelerator: 'CmdOrCtrl+Shift+I', click: () => sendToFocused('menu:format', 'image') },
+        { label: 'Table…', accelerator: 'CmdOrCtrl+Shift+T', click: () => sendToFocused('menu:format', 'table') },
         { type: 'separator' },
         { label: 'Heading 1', accelerator: 'CmdOrCtrl+1', click: () => sendToFocused('menu:format', 'h1') },
         { label: 'Heading 2', accelerator: 'CmdOrCtrl+2', click: () => sendToFocused('menu:format', 'h2') },

@@ -25,6 +25,13 @@
         <button type="button" data-format="image" title="Image (⌘⇧I)">
           <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M2 3h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm.5 1.5v7h11v-7h-11ZM5 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm-1.5 5h9l-3-4-2.25 3-1.25-1.5-2.5 2.5Z"/></svg>
         </button>
+        <button type="button" id="tb-table" title="Insert Table (⌘⇧T)" aria-haspopup="true" aria-expanded="false">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M2 3h12v10H2V3Zm1 1v2h10V4H3Zm0 3v2h4.5V7H3Zm5.5 0v2H13V7H8.5ZM3 10v2h4.5v-2H3Zm5.5 0v2H13v-2H8.5Z"/></svg>
+        </button>
+        <div id="table-picker" hidden>
+          <div id="table-picker-grid"></div>
+          <div id="table-picker-label">Insert table</div>
+        </div>
         <span class="tb-sep"></span>
         <button type="button" data-format="ul" title="Bulleted List (⌘⇧8)">
           <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M3 3.6h1.6v1.6H3V3.6Zm3.4.3H13v1H6.4v-1ZM3 7.2h1.6v1.6H3V7.2Zm3.4.3H13v1H6.4v-1ZM3 10.8h1.6v1.6H3v-1.6Zm3.4.3H13v1H6.4v-1Z"/></svg>

@@ -49,6 +49,7 @@ html, body {
 
 /* ---- Formatting toolbar (its own row, below the title bar) ---- */
 #toolbar {
+  position: relative;
   flex: 0 0 auto;
   display: flex;
   align-items: center;
@@ -87,6 +88,37 @@ html, body {
   height: 14px;
   margin: 0 5px;
   background: var(--border);
+}
+
+/* Word-style insert-table grid picker */
+#table-picker {
+  position: absolute;
+  top: 33px;
+  z-index: 50;
+  padding: 8px;
+  background: var(--status-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+#table-picker[hidden] { display: none; }
+#table-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 15px);
+  grid-auto-rows: 15px;
+  gap: 3px;
+}
+.tp-cell {
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg);
+}
+.tp-cell.on { background: var(--accent); border-color: var(--accent); }
+#table-picker-label {
+  margin-top: 6px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
 }
 
 #workspace {
