@@ -86,16 +86,23 @@ const editorTheme = EditorView.theme({
 }, { dark });
 
 // ---------------------------------------------------------------------------
-// Document state
+// Tabs
+//
+// Two kinds of tab:
+//   - scratch: a perpetual notebook tab. Auto-persisted to disk on every
+//     change, never "dirty", never nags. Saving one converts it to a file tab.
+//   - file: a real document on the filesystem. Classic dirty tracking.
+// Each tab owns its own CodeMirror EditorState; one EditorView swaps between
+// them. The tab layout is persisted via session:save.
 // ---------------------------------------------------------------------------
-const doc = {
-  filePath: null,
-  displayName: 'Untitled',
-  savedText: '',          // text as last saved / loaded
-  dirty: false,
-  empty: true,
-  isScratch: false,       // the perpetual notebook (auto-persisted, never dirty)
-};
+
+/** @type {Array<{kind:'scratch'|'file', id?:string, path?:string, name:string, state:EditorState, savedText:string, dirty:boolean}>} */
+let tabs = [];
+let active = -1;
+
+function genId() {
+  return 'nb-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
 
 const lineNumbersComp = new Compartment();
 const lineWrapComp = new Compartment();
@@ -111,8 +118,19 @@ const editorParent = document.getElementById('editor');
 const updateListener = EditorView.updateListener.of((v) => {
   if (v.docChanged) {
     schedulePreview();
-    recomputeDirty();
-    if (doc.isScratch) scheduleScratchSave();
+    const tab = tabs[active];
+    if (tab) {
+      if (tab.kind === 'scratch') {
+        scheduleNotebookSave(tab);
+      } else {
+        const dirty = v.state.doc.toString() !== tab.savedText;
+        if (dirty !== tab.dirty) {
+          tab.dirty = dirty;
+          renderTabs();
+          notifyState();
+        }
+      }
+    }
   }
   if (v.docChanged || v.selectionSet) {
     updateStatus();
@@ -149,10 +167,218 @@ function baseExtensions() {
   ];
 }
 
+function freshState(content) {
+  return EditorState.create({ doc: content, extensions: baseExtensions() });
+}
+
 const view = new EditorView({
   parent: editorParent,
-  state: EditorState.create({ doc: '', extensions: baseExtensions() }),
+  state: freshState(''),
 });
+
+// Store the live editor state back onto the active tab. Must run before
+// `active` changes, so no keystrokes are lost.
+function syncActive() {
+  const tab = tabs[active];
+  if (tab) tab.state = view.state;
+}
+
+function textOf(tab) {
+  return tab === tabs[active] ? view.state.doc.toString() : tab.state.doc.toString();
+}
+
+// Compartments live per-EditorState, so re-apply the global toggles whenever
+// the view adopts another tab's state.
+function applyEditorPrefs() {
+  view.dispatch({
+    effects: [
+      lineNumbersComp.reconfigure(showLineNumbers ? lineNumbers() : []),
+      lineWrapComp.reconfigure(lineWrap ? EditorView.lineWrapping : []),
+    ],
+  });
+}
+
+// Make tab `active` the one on screen and refresh all chrome around it.
+function activateTab() {
+  const tab = tabs[active];
+  view.setState(tab.state);
+  applyEditorPrefs();
+  renderTabs();
+  updateStatus();
+  notifyState();
+  renderPreview();
+  saveSession();
+  view.focus();
+}
+
+// ---------------------------------------------------------------------------
+// Tab bar
+// ---------------------------------------------------------------------------
+const tabbarEl = document.getElementById('tabbar');
+
+function renderTabs() {
+  tabbarEl.textContent = '';
+  tabs.forEach((tab, i) => {
+    const el = document.createElement('div');
+    el.className = 'tab' + (i === active ? ' active' : '') + (tab.dirty ? ' dirty' : '');
+    el.title = tab.kind === 'file' ? tab.path : 'Notebook tab — auto-saved, no file';
+
+    const dot = document.createElement('span');
+    dot.className = 'tab-dirty';
+    const name = document.createElement('span');
+    name.className = 'tab-name';
+    name.textContent = tab.name;
+    const close = document.createElement('span');
+    close.className = 'tab-close';
+    close.textContent = '×';
+    close.title = 'Close Tab (⌘W)';
+
+    el.append(dot, name, close);
+    el.addEventListener('mousedown', (e) => {
+      if (e.button !== 0 || e.target === close) return;
+      switchTab(i);
+    });
+    el.addEventListener('auxclick', (e) => {
+      if (e.button === 1) closeTab(i);
+    });
+    close.addEventListener('click', () => closeTab(i));
+    tabbarEl.appendChild(el);
+  });
+
+  const plus = document.createElement('button');
+  plus.id = 'tab-new';
+  plus.type = 'button';
+  plus.textContent = '+';
+  plus.title = 'New Tab (⌘T)';
+  plus.addEventListener('click', () => newScratchTab());
+  tabbarEl.appendChild(plus);
+}
+
+function switchTab(i) {
+  if (i === active || !tabs[i]) return;
+  syncActive();
+  active = i;
+  activateTab();
+}
+
+function nextNotebookName() {
+  const names = new Set(tabs.filter((t2) => t2.kind === 'scratch').map((t2) => t2.name));
+  if (!names.has('Notebook')) return 'Notebook';
+  let n = 2;
+  while (names.has(`Notebook ${n}`)) n++;
+  return `Notebook ${n}`;
+}
+
+function newScratchTab() {
+  syncActive();
+  const tab = {
+    kind: 'scratch',
+    id: genId(),
+    name: nextNotebookName(),
+    state: freshState(''),
+    savedText: '',
+    dirty: false,
+  };
+  tabs.push(tab);
+  window.api.notebookSave(tab.id, '');
+  active = tabs.length - 1;
+  activateTab();
+}
+
+function addFileTabs(files) {
+  syncActive();
+  let target = -1;
+  for (const f of files || []) {
+    const existing = tabs.findIndex((t2) => t2.kind === 'file' && t2.path === f.path);
+    if (existing >= 0) {
+      target = existing;
+      continue;
+    }
+    tabs.push({
+      kind: 'file',
+      path: f.path,
+      name: f.name,
+      state: freshState(f.content),
+      savedText: f.content,
+      dirty: false,
+    });
+    target = tabs.length - 1;
+  }
+  if (target >= 0) {
+    active = target;
+    activateTab();
+  }
+}
+
+async function closeTab(i) {
+  const tab = tabs[i];
+  if (!tab) return;
+
+  if (tab.kind === 'scratch') {
+    if (textOf(tab).trim().length) {
+      const choice = await window.api.confirm({
+        message: `Do you want to save “${tab.name}” before closing it?`,
+        detail: 'It is an unsaved notebook tab — closing it discards its contents.',
+        buttons: ['Save…', 'Discard', 'Cancel'],
+        defaultId: 0,
+        cancelId: 2,
+      });
+      if (choice === 2) return;
+      if (choice === 0) {
+        const ok = await saveTabAs(tab); // adopts a file identity + removes the notebook
+        if (!ok) return;
+      } else {
+        window.api.notebookDelete(tab.id);
+      }
+    } else {
+      window.api.notebookDelete(tab.id);
+    }
+  } else if (tab.dirty) {
+    const choice = await window.api.confirm({
+      message: `Do you want to save the changes you made to ${tab.name}?`,
+      detail: "Your changes will be lost if you don't save them.",
+      buttons: ['Save', "Don't Save", 'Cancel'],
+      defaultId: 0,
+      cancelId: 2,
+    });
+    if (choice === 2) return;
+    if (choice === 0) {
+      const ok = await saveTab(tab);
+      if (!ok) return;
+    }
+  }
+  removeTab(tab);
+}
+
+function removeTab(tab) {
+  const i = tabs.indexOf(tab);
+  if (i < 0) return;
+  const closingActive = i === active;
+  tabs.splice(i, 1);
+
+  if (!closingActive) {
+    if (i < active) active--;
+    renderTabs();
+    notifyState();
+    saveSession();
+    return;
+  }
+  // The window always keeps at least one notebook tab.
+  if (!tabs.length) {
+    const fresh = {
+      kind: 'scratch',
+      id: genId(),
+      name: 'Notebook',
+      state: freshState(''),
+      savedText: '',
+      dirty: false,
+    };
+    tabs.push(fresh);
+    window.api.notebookSave(fresh.id, '');
+  }
+  active = Math.min(i, tabs.length - 1);
+  activateTab();
+}
 
 // ---------------------------------------------------------------------------
 // Preview (debounced)
@@ -212,93 +438,108 @@ function updateStatus() {
 }
 
 // ---------------------------------------------------------------------------
-// Dirty tracking + main-process notification
+// Persistence: notebooks (debounced per tab) + session layout
 // ---------------------------------------------------------------------------
-function recomputeDirty() {
-  const text = view.state.doc.toString();
-  // The notebook is auto-persisted, so it is never "dirty".
-  const dirty = doc.isScratch ? false : text !== doc.savedText;
-  const empty = text.length === 0 && !doc.filePath && !doc.isScratch;
-  if (dirty !== doc.dirty || empty !== doc.empty) {
-    doc.dirty = dirty;
-    doc.empty = empty;
-    notifyState();
-  }
+const notebookTimers = new Map();
+
+function scheduleNotebookSave(tab) {
+  clearTimeout(notebookTimers.get(tab.id));
+  notebookTimers.set(tab.id, setTimeout(() => {
+    notebookTimers.delete(tab.id);
+    if (tabs.includes(tab)) window.api.notebookSave(tab.id, textOf(tab));
+  }, 400));
 }
 
-// Auto-persist the perpetual notebook (debounced).
-let scratchTimer = null;
-function scheduleScratchSave() {
-  if (scratchTimer) clearTimeout(scratchTimer);
-  scratchTimer = setTimeout(flushScratch, 400);
+function sessionState() {
+  return {
+    tabs: tabs.map((tab) => (tab.kind === 'scratch'
+      ? { kind: 'scratch', id: tab.id, name: tab.name }
+      : { kind: 'file', path: tab.path })),
+    active,
+  };
 }
-function flushScratch() {
-  if (scratchTimer) { clearTimeout(scratchTimer); scratchTimer = null; }
-  if (doc.isScratch && window.api) {
-    window.api.saveScratch(view.state.doc.toString());
-  }
+
+function saveSession() {
+  if (window.api) window.api.sessionSave(sessionState());
 }
+
 // Make sure the last keystrokes survive an app quit / window close.
-window.addEventListener('beforeunload', flushScratch);
+function flushNotebooks() {
+  syncActive();
+  for (const tab of tabs) {
+    if (tab.kind === 'scratch') window.api.notebookSave(tab.id, tab.state.doc.toString());
+  }
+  saveSession();
+}
+window.addEventListener('beforeunload', flushNotebooks);
 
 function notifyState() {
-  document.title = (doc.dirty ? '• ' : '') + doc.displayName;
+  const tab = tabs[active];
+  if (!tab) return;
+  const dirtyFiles = tabs.filter((t2) => t2.kind === 'file' && t2.dirty).map((t2) => t2.name);
+  document.title = (tab.dirty ? '• ' : '') + tab.name;
   if (window.api) {
     window.api.setDocState({
-      dirty: doc.dirty,
-      empty: doc.empty,
-      displayName: doc.displayName,
-      filePath: doc.filePath,
+      title: tab.name,
+      filePath: tab.kind === 'file' ? tab.path : null,
+      dirtyFiles,
     });
   }
 }
 
 // ---------------------------------------------------------------------------
-// Load / save
+// Save
 // ---------------------------------------------------------------------------
-function setDocument(text, filePath, displayName) {
-  doc.filePath = filePath || null;
-  doc.displayName = displayName || 'Untitled';
-  doc.savedText = text;
-  view.dispatch({
-    changes: { from: 0, to: view.state.doc.length, insert: text },
-    selection: { anchor: 0 },
+
+// Save a file tab in place (silent write — file tabs always have a path).
+async function saveTab(tab) {
+  if (tab.kind !== 'file') return saveTabAs(tab);
+  const content = textOf(tab);
+  const res = await window.api.save({ path: tab.path, content, defaultName: tab.name });
+  if (!res || res.canceled) return false;
+  tab.savedText = content;
+  tab.dirty = false;
+  renderTabs();
+  notifyState();
+  return true;
+}
+
+// Save As. For a notebook tab this ADOPTS the file identity: the tab becomes
+// a file tab and its auto-persisted notebook copy is removed.
+async function saveTabAs(tab) {
+  const content = textOf(tab);
+  const res = await window.api.saveAs({
+    content,
+    defaultName: tab.kind === 'file' ? tab.name : `${tab.name}.md`,
   });
-  doc.dirty = false;
-  doc.empty = text.length === 0 && !doc.filePath && !doc.isScratch;
-  notifyState();
-  updateStatus();
-  renderPreview();
-}
-
-function adoptSaved(res, content) {
-  // adopt === false means an "export a copy" of the notebook: stay the notebook.
-  if (res.adopt === false) {
-    if (doc.isScratch) flushScratch();
-    return;
+  if (!res || res.canceled) return false;
+  if (tab.kind === 'scratch') {
+    window.api.notebookDelete(tab.id);
+    notebookTimers.delete(tab.id);
+    delete tab.id;
   }
-  doc.isScratch = false;
-  doc.filePath = res.filePath;
-  doc.displayName = res.displayName;
-  doc.savedText = content;
-  doc.dirty = false;
-  doc.empty = false;
+  tab.kind = 'file';
+  tab.path = res.path;
+  tab.name = res.name;
+  tab.savedText = content;
+  tab.dirty = false;
+  renderTabs();
   notifyState();
+  saveSession();
+  return true;
 }
 
-async function save({ closeAfter = false } = {}) {
-  const content = view.state.doc.toString();
-  const res = await window.api.save({ filePath: doc.filePath, content });
-  if (res && !res.canceled) {
-    adoptSaved(res, content);
-    if (closeAfter) window.api.requestClose();
+// Triggered by main when the window closes with dirty file tabs.
+async function saveAllAndClose() {
+  syncActive();
+  for (const tab of tabs) {
+    if (tab.kind === 'file' && tab.dirty) {
+      const ok = await saveTab(tab);
+      if (!ok) return; // save failed/canceled — abort the close
+    }
   }
-}
-
-async function saveAs() {
-  const content = view.state.doc.toString();
-  const res = await window.api.saveAs({ content });
-  if (res && !res.canceled) adoptSaved(res, content);
+  flushNotebooks();
+  window.api.requestClose();
 }
 
 // ---------------------------------------------------------------------------
@@ -554,19 +795,12 @@ function toggleLineWrap() {
 // Wire up menu events from main
 // ---------------------------------------------------------------------------
 if (window.api) {
-  window.api.on('file:loaded', ({ filePath, content }) => {
-    doc.isScratch = false;
-    setDocument(content, filePath, filePath.split('/').pop());
-  });
-  window.api.on('scratch:loaded', ({ content }) => {
-    doc.isScratch = true;
-    setDocument(content, null, 'Notebook');
-    // Put the cursor at the end so you resume where you left off.
-    view.dispatch({ selection: { anchor: view.state.doc.length }, scrollIntoView: true });
-    view.focus();
-  });
-  window.api.on('menu:save', (payload) => save(payload || {}));
-  window.api.on('menu:saveAs', () => saveAs());
+  window.api.on('tab:openFiles', (files) => addFileTabs(files));
+  window.api.on('window:saveAllAndClose', () => saveAllAndClose());
+  window.api.on('menu:newTab', () => newScratchTab());
+  window.api.on('menu:closeTab', () => closeTab(active));
+  window.api.on('menu:save', () => { if (tabs[active]) saveTab(tabs[active]); });
+  window.api.on('menu:saveAs', () => { if (tabs[active]) saveTabAs(tabs[active]); });
   window.api.on('menu:find', () => openSearchPanel(view));
   window.api.on('menu:replace', () => openSearchPanel(view));
   window.api.on('menu:format', (kind) => applyFormat(kind));
@@ -576,8 +810,25 @@ if (window.api) {
   window.api.on('menu:toggleLineWrap', () => toggleLineWrap());
 }
 
-// Initial paint — start editor-only; preview is opt-in via the toggle.
-setViewMode('editor');
-updateStatus();
-notifyState();
-view.focus();
+// ---------------------------------------------------------------------------
+// Boot: restore the session (notebook tabs + file tabs + active tab)
+// ---------------------------------------------------------------------------
+async function init() {
+  setViewMode('editor');
+  if (!window.api) return;
+  const session = await window.api.sessionLoad();
+  tabs = session.tabs.map((f) => (f.kind === 'scratch'
+    ? { kind: 'scratch', id: f.id, name: f.name, state: freshState(f.content), savedText: f.content, dirty: false }
+    : { kind: 'file', path: f.path, name: f.name, state: freshState(f.content), savedText: f.content, dirty: false }));
+  active = Math.min(Math.max(session.active | 0, 0), tabs.length - 1);
+  view.setState(tabs[active].state);
+  applyEditorPrefs();
+  // Put the cursor at the end so you resume where you left off.
+  view.dispatch({ selection: { anchor: view.state.doc.length }, scrollIntoView: true });
+  renderTabs();
+  updateStatus();
+  notifyState();
+  view.focus();
+}
+
+init();
