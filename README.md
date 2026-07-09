@@ -52,7 +52,7 @@ left off.
 | 🗂 **Tabs** | Mix perpetual notebook tabs with real files from disk in one window — the whole layout is restored on relaunch. |
 | ✍️ **Real Markdown editor** | CodeMirror 6 with live syntax highlighting, line numbers, active-line highlight, bracket matching & soft wrap. |
 | 👀 **Optional live preview** | A one-click toggle (or `⌘⇧P`) for a rendered side-by-side preview. Off by default — it's there when you want it. |
-| 🌗 **Native & theme-aware** | Hidden-inset title bar, system fonts, and automatic light/dark that follows macOS. |
+| 🌗 **Native & theme-aware** | Hidden-inset title bar, system fonts, and light/dark that follows macOS — or force it in **View → Appearance** (remembered across launches). |
 | 💾 **Save only if you want** | `⌘S` on a notebook tab saves it to disk — the tab simply becomes that file. `⌘O` opens existing files in tabs. |
 | 🔎 **Find & Replace** | `⌘F` / `⌘⌥F` powered by CodeMirror's search. |
 | 🔠 **Toolbar & shortcuts** | Bold, italic, code, links, images, headings, lists & blockquotes — one click on the toolbar or one keystroke away. |

@@ -19,7 +19,10 @@ const NOTEBOOKS_DIR = path.join(USER_DATA, 'notebooks');
 const SESSION_PATH = path.join(USER_DATA, 'session.json');
 const LEGACY_SCRATCH_PATH = path.join(USER_DATA, 'scratch.md');
 
+const SETTINGS_PATH = path.join(USER_DATA, 'settings.json');
+
 const NOTEBOOK_ID_RE = /^nb-[a-z0-9]+$/;
+const THEMES = ['system', 'light', 'dark'];
 
 const MD_FILTERS = [
   { name: 'Markdown', extensions: ['md', 'markdown'] },
@@ -79,6 +82,36 @@ function readSession() {
   const session = { tabs: [{ kind: 'scratch', id: 'nb-1', name: 'Notebook' }], active: 0 };
   writeSession(session);
   return session;
+}
+
+function readSettings() {
+  try {
+    const s = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf-8'));
+    return s && typeof s === 'object' ? s : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeSettings(patch) {
+  try {
+    fs.mkdirSync(USER_DATA, { recursive: true });
+    fs.writeFileSync(SETTINGS_PATH, JSON.stringify({ ...readSettings(), ...patch }, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('settings save failed:', err);
+  }
+}
+
+// Appearance: 'system' | 'light' | 'dark'. Setting nativeTheme.themeSource
+// drives prefers-color-scheme in the renderer, which the CSS + editor theme
+// both react to.
+let themePref = THEMES.includes(readSettings().theme) ? readSettings().theme : 'system';
+
+function setTheme(theme) {
+  if (!THEMES.includes(theme)) return;
+  themePref = theme;
+  nativeTheme.themeSource = theme;
+  writeSettings({ theme });
 }
 
 /** @type {BrowserWindow | null} */
@@ -394,6 +427,15 @@ function buildMenu() {
         { label: 'Editor Only', accelerator: 'CmdOrCtrl+Shift+E', click: () => sendToFocused('menu:viewMode', 'editor') },
         { label: 'Preview Only', accelerator: 'CmdOrCtrl+Shift+R', click: () => sendToFocused('menu:viewMode', 'preview') },
         { type: 'separator' },
+        {
+          label: 'Appearance',
+          submenu: [
+            { label: 'System', type: 'radio', checked: themePref === 'system', click: () => setTheme('system') },
+            { label: 'Light', type: 'radio', checked: themePref === 'light', click: () => setTheme('light') },
+            { label: 'Dark', type: 'radio', checked: themePref === 'dark', click: () => setTheme('dark') },
+          ],
+        },
+        { type: 'separator' },
         { label: 'Toggle Line Numbers', click: () => sendToFocused('menu:toggleLineNumbers') },
         { label: 'Toggle Line Wrap', click: () => sendToFocused('menu:toggleLineWrap') },
         { type: 'separator' },
@@ -428,6 +470,7 @@ function buildMenu() {
 
 app.whenReady().then(() => {
   appReady = true;
+  nativeTheme.themeSource = themePref;
   buildMenu();
   createWindow();
   if (pendingOpenFiles.length) {

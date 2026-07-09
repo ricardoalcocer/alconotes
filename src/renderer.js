@@ -29,61 +29,75 @@ const md = new MarkdownIt({
 });
 
 // ---------------------------------------------------------------------------
-// Syntax highlighting theme (adapts to light / dark)
+// Syntax highlighting theme (adapts to light / dark — live, via a Compartment)
 // ---------------------------------------------------------------------------
-const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-const palette = dark
-  ? { heading: '#4aa3ff', emph: '#e6e6e6', strong: '#ffd479', link: '#7ee787',
-      code: '#ff9d70', quote: '#8a8a8e', meta: '#8a8a8e', list: '#c792ea' }
-  : { heading: '#0a5bd3', emph: '#1d1d1f', strong: '#8a5a00', link: '#0f7a2e',
-      code: '#b1370a', quote: '#86868b', meta: '#86868b', list: '#7b3fb5' };
+function makeThemeExtensions() {
+  const dark = darkQuery.matches;
 
-const mdHighlight = HighlightStyle.define([
-  { tag: t.heading, color: palette.heading, fontWeight: '700' },
-  { tag: t.heading1, color: palette.heading, fontWeight: '700', fontSize: '1.3em' },
-  { tag: t.heading2, color: palette.heading, fontWeight: '700', fontSize: '1.18em' },
-  { tag: t.heading3, color: palette.heading, fontWeight: '700', fontSize: '1.08em' },
-  { tag: t.strong, color: palette.strong, fontWeight: '700' },
-  { tag: t.emphasis, color: palette.emph, fontStyle: 'italic' },
-  { tag: t.strikethrough, textDecoration: 'line-through' },
-  { tag: [t.link, t.url], color: palette.link, textDecoration: 'underline' },
-  { tag: [t.monospace], color: palette.code },
-  { tag: t.quote, color: palette.quote, fontStyle: 'italic' },
-  { tag: [t.list, t.processingInstruction], color: palette.list },
-  { tag: [t.meta, t.comment], color: palette.meta },
-  { tag: t.contentSeparator, color: palette.meta },
-]);
+  const palette = dark
+    ? { heading: '#4aa3ff', emph: '#e6e6e6', strong: '#ffd479', link: '#7ee787',
+        code: '#ff9d70', quote: '#8a8a8e', meta: '#8a8a8e', list: '#c792ea' }
+    : { heading: '#0a5bd3', emph: '#1d1d1f', strong: '#8a5a00', link: '#0f7a2e',
+        code: '#b1370a', quote: '#86868b', meta: '#86868b', list: '#7b3fb5' };
 
-const editorTheme = EditorView.theme({
-  '&': {
-    color: 'var(--fg)',
-    backgroundColor: 'var(--bg)',
-    height: '100%',
-    fontSize: '15px',
-  },
-  '.cm-content': {
-    caretColor: 'var(--accent)',
-    padding: '8px 0',
-    lineHeight: '1.6',
-  },
-  '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--accent)', borderLeftWidth: '2px' },
-  '&.cm-focused .cm-selectionBackground, ::selection': { backgroundColor: dark ? '#33415580' : '#b3d4fc80' },
-  '.cm-selectionBackground': { backgroundColor: dark ? '#2a3140' : '#d7e6ff' },
-  '.cm-gutters': {
-    backgroundColor: 'var(--bg)',
-    color: 'var(--muted)',
-    border: 'none',
-    borderRight: '1px solid var(--border)',
-    fontFamily: 'var(--font-mono)',
-  },
-  '.cm-activeLine': { backgroundColor: dark ? '#ffffff08' : '#00000005' },
-  '.cm-activeLineGutter': { backgroundColor: 'transparent', color: 'var(--fg)' },
-  '.cm-scroller': { padding: '0 16px' },
-  '.cm-selectionMatch': { backgroundColor: dark ? '#3a4a2f' : '#e4f0c7' },
-  '.cm-searchMatch': { backgroundColor: dark ? '#5a4a1f' : '#fff2a8', outline: '1px solid #d0b64a' },
-  '.cm-searchMatch-selected': { backgroundColor: dark ? '#7a5a1f' : '#ffd54a' },
-}, { dark });
+  const mdHighlight = HighlightStyle.define([
+    { tag: t.heading, color: palette.heading, fontWeight: '700' },
+    { tag: t.heading1, color: palette.heading, fontWeight: '700', fontSize: '1.3em' },
+    { tag: t.heading2, color: palette.heading, fontWeight: '700', fontSize: '1.18em' },
+    { tag: t.heading3, color: palette.heading, fontWeight: '700', fontSize: '1.08em' },
+    { tag: t.strong, color: palette.strong, fontWeight: '700' },
+    { tag: t.emphasis, color: palette.emph, fontStyle: 'italic' },
+    { tag: t.strikethrough, textDecoration: 'line-through' },
+    { tag: [t.link, t.url], color: palette.link, textDecoration: 'underline' },
+    { tag: [t.monospace], color: palette.code },
+    { tag: t.quote, color: palette.quote, fontStyle: 'italic' },
+    { tag: [t.list, t.processingInstruction], color: palette.list },
+    { tag: [t.meta, t.comment], color: palette.meta },
+    { tag: t.contentSeparator, color: palette.meta },
+  ]);
+
+  const editorTheme = EditorView.theme({
+    '&': {
+      color: 'var(--fg)',
+      backgroundColor: 'var(--bg)',
+      height: '100%',
+      fontSize: '15px',
+    },
+    '.cm-content': {
+      caretColor: 'var(--accent)',
+      padding: '8px 0',
+      lineHeight: '1.6',
+    },
+    '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--accent)', borderLeftWidth: '2px' },
+    '&.cm-focused .cm-selectionBackground, ::selection': { backgroundColor: dark ? '#33415580' : '#b3d4fc80' },
+    '.cm-selectionBackground': { backgroundColor: dark ? '#2a3140' : '#d7e6ff' },
+    '.cm-gutters': {
+      backgroundColor: 'var(--bg)',
+      color: 'var(--muted)',
+      border: 'none',
+      borderRight: '1px solid var(--border)',
+      fontFamily: 'var(--font-mono)',
+    },
+    '.cm-activeLine': { backgroundColor: dark ? '#ffffff08' : '#00000005' },
+    '.cm-activeLineGutter': { backgroundColor: 'transparent', color: 'var(--fg)' },
+    '.cm-scroller': { padding: '0 16px' },
+    '.cm-selectionMatch': { backgroundColor: dark ? '#3a4a2f' : '#e4f0c7' },
+    '.cm-searchMatch': { backgroundColor: dark ? '#5a4a1f' : '#fff2a8', outline: '1px solid #d0b64a' },
+    '.cm-searchMatch-selected': { backgroundColor: dark ? '#7a5a1f' : '#ffd54a' },
+  }, { dark });
+
+  return [syntaxHighlighting(mdHighlight), editorTheme];
+}
+
+const themeComp = new Compartment();
+
+// Follows both macOS appearance changes and the View > Appearance menu
+// (main sets nativeTheme.themeSource, which drives prefers-color-scheme).
+darkQuery.addEventListener('change', () => {
+  view.dispatch({ effects: themeComp.reconfigure(makeThemeExtensions()) });
+});
 
 // ---------------------------------------------------------------------------
 // Tabs
@@ -154,8 +168,7 @@ function baseExtensions() {
     crosshairCursor(),
     search({ top: true }),
     markdown({ base: markdownLanguage, codeLanguages: languages, addKeymap: true }),
-    syntaxHighlighting(mdHighlight),
-    editorTheme,
+    themeComp.of(makeThemeExtensions()),
     lineWrapComp.of(lineWrap ? EditorView.lineWrapping : []),
     keymap.of([
       ...defaultKeymap,
@@ -194,6 +207,7 @@ function applyEditorPrefs() {
     effects: [
       lineNumbersComp.reconfigure(showLineNumbers ? lineNumbers() : []),
       lineWrapComp.reconfigure(lineWrap ? EditorView.lineWrapping : []),
+      themeComp.reconfigure(makeThemeExtensions()),
     ],
   });
 }
