@@ -3,6 +3,7 @@
 const { app, BrowserWindow, Menu, dialog, ipcMain, shell, nativeTheme } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { installContextMenu } = require('./context-menu');
 
 const isMac = process.platform === 'darwin';
 
@@ -54,6 +55,7 @@ function createWindow(filePath = null, opts = {}) {
   });
 
   win.loadFile('index.html');
+  installContextMenu(win);
 
   win.__scratch = scratch;
 

@@ -21,6 +21,7 @@
     },
     "files": [
       "main.js",
+      "context-menu.js",
       "preload.js",
       "index.html",
       "styles.css",
