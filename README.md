@@ -62,8 +62,14 @@ left off.
 Grab a build from [**Releases**](https://github.com/ricardoalcocer/alconotes/releases),
 or build it yourself below.
 
-> ℹ️ Builds are unsigned (ad-hoc), so the first launch needs **right-click → Open**
-> (or *System Settings → Privacy & Security → Open Anyway*).
+> ℹ️ Builds are unsigned (not notarized), so macOS quarantines **downloaded** copies —
+> on recent macOS they may even report as "damaged". Clear the flag with:
+>
+> ```bash
+> xattr -dr com.apple.quarantine /Applications/AlcoNotes.app
+> ```
+>
+> Builds you compile yourself (`npm run dist`) are never quarantined.
 
 ## 🛠️ Develop
 
