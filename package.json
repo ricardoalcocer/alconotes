@@ -1,6 +1,6 @@
 {
   "name": "alconotes",
-  "productName": "AlcoNotes",
+  "productName": "Buffer",
   "version": "0.1.0",
   "description": "A perpetual Markdown notebook — a fast, native-feeling editor in the spirit of CotEditor",
   "main": "main.js",
@@ -15,7 +15,7 @@
   },
   "build": {
     "appId": "com.alco.alconotes",
-    "productName": "AlcoNotes",
+    "productName": "Buffer",
     "directories": {
       "output": "release"
     },

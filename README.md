@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="build/icon-1024.png" alt="AlcoNotes" width="140" />
+<img src="build/icon-1024.png" alt="Buffer" width="140" />
 
-# AlcoNotes
+# Buffer
 
 ### The Markdown notebook that's *always already open.*
 
@@ -28,17 +28,17 @@ A fast, native-feeling macOS Markdown editor in the spirit of
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-dark.png" />
   <source media="(prefers-color-scheme: light)" srcset="docs/screenshot-light.png" />
-  <img alt="AlcoNotes — split editor and live preview" src="docs/screenshot-dark.png" width="860" />
+  <img alt="Buffer — split editor and live preview" src="docs/screenshot-dark.png" width="860" />
 </picture>
 
 </div>
 
 ---
 
-## ✨ Why AlcoNotes
+## ✨ Why Buffer
 
 Most editors treat a blank document as a *chore* you have to name and save.
-AlcoNotes treats your notebook as a **place you return to** — a single, perpetual
+Buffer treats your notebook as a **place you return to** — a single, perpetual
 scratch note that's saved for you on every keystroke and picks up exactly where you
 left off.
 
@@ -67,7 +67,7 @@ or build it yourself below.
 > on recent macOS they may even report as "damaged". Clear the flag with:
 >
 > ```bash
-> xattr -dr com.apple.quarantine /Applications/AlcoNotes.app
+> xattr -dr com.apple.quarantine /Applications/Buffer.app
 > ```
 >
 > Builds you compile yourself (`npm run dist`) are never quarantined.
@@ -94,9 +94,9 @@ npm run dist
 
 Outputs to `release/`:
 
-- 🍎 `AlcoNotes.app` — the runnable app (`release/mac-arm64/`)
-- 💽 `AlcoNotes-<version>-arm64.dmg` — drag-to-install disk image
-- 🗜️ `AlcoNotes-<version>-arm64-mac.zip` — zipped app
+- 🍎 `Buffer.app` — the runnable app (`release/mac-arm64/`)
+- 💽 `Buffer-<version>-arm64.dmg` — drag-to-install disk image
+- 🗜️ `Buffer-<version>-arm64-mac.zip` — zipped app
 
 Built for Apple Silicon (arm64). The app icon is generated into
 `build/icon.icns` and embedded automatically.
@@ -106,7 +106,7 @@ Built for Apple Silicon (arm64). The app icon is generated into
 Every notebook tab is a plain Markdown file:
 
 ```
-~/Library/Application Support/AlcoNotes/notebooks/*.md
+~/Library/Application Support/Buffer/notebooks/*.md
 ```
 
 (and the tab layout lives next to them in `session.json` — a pre-tabs

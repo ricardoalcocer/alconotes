@@ -21,6 +21,39 @@ const LEGACY_SCRATCH_PATH = path.join(USER_DATA, 'scratch.md');
 
 const SETTINGS_PATH = path.join(USER_DATA, 'settings.json');
 
+// One-time migration: the app used to be called AlcoNotes, and the userData
+// folder follows the product name. Copy the old data over on first launch
+// (the old folder is left in place as a backup). The env overrides exist for
+// tests; a test dir without an explicit old-dir skips migration entirely.
+const OLD_USER_DATA = process.env.ALCONOTES_OLD_USER_DATA
+  || path.join(app.getPath('appData'), 'AlcoNotes');
+const SKIP_MIGRATION = !!process.env.ALCONOTES_USER_DATA && !process.env.ALCONOTES_OLD_USER_DATA;
+
+function migrateLegacyUserData() {
+  try {
+    if (SKIP_MIGRATION) return;
+    if (fs.existsSync(SESSION_PATH)) return;         // already migrated / fresh data exists
+    if (!fs.existsSync(OLD_USER_DATA)) return;       // nothing to migrate
+    fs.mkdirSync(USER_DATA, { recursive: true });
+    for (const entry of ['session.json', 'settings.json', 'scratch.md']) {
+      const src = path.join(OLD_USER_DATA, entry);
+      const dst = path.join(USER_DATA, entry);
+      if (fs.existsSync(src) && !fs.existsSync(dst)) fs.copyFileSync(src, dst);
+    }
+    const oldNotebooks = path.join(OLD_USER_DATA, 'notebooks');
+    if (fs.existsSync(oldNotebooks)) {
+      fs.mkdirSync(NOTEBOOKS_DIR, { recursive: true });
+      for (const f of fs.readdirSync(oldNotebooks)) {
+        const dst = path.join(NOTEBOOKS_DIR, f);
+        if (!fs.existsSync(dst)) fs.copyFileSync(path.join(oldNotebooks, f), dst);
+      }
+    }
+  } catch (err) {
+    console.error('legacy data migration failed:', err);
+  }
+}
+migrateLegacyUserData();
+
 const NOTEBOOK_ID_RE = /^nb-[a-z0-9]+$/;
 const THEMES = ['system', 'light', 'dark'];
 
@@ -332,7 +365,7 @@ ipcMain.on('doc:state', (event, payload) => {
   win.__dirtyFiles = dirtyFiles;
   win.setDocumentEdited(dirtyFiles.length > 0);
   win.setRepresentedFilename(typeof payload.filePath === 'string' ? payload.filePath : '');
-  win.setTitle(String(payload.title || 'AlcoNotes'));
+  win.setTitle(String(payload.title || 'Buffer'));
 });
 
 // Renderer asks main to finish closing (after save-all triggered by close).
@@ -459,7 +492,7 @@ function buildMenu() {
       role: 'help',
       submenu: [
         {
-          label: 'AlcoNotes on GitHub',
+          label: 'Buffer on GitHub',
           click: () => shell.openExternal('https://github.com/ricardoalcocer/alconotes'),
         },
       ],
