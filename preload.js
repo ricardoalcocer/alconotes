@@ -2,10 +2,12 @@
 
 const { contextBridge, ipcRenderer } = require('electron');
 
-// Menu/main -> renderer events the renderer can subscribe to.
+// Channels the renderer is allowed to listen on.
 const incoming = [
-  'file:loaded',
-  'scratch:loaded',
+  'tab:openFiles',
+  'window:saveAllAndClose',
+  'menu:newTab',
+  'menu:closeTab',
   'menu:save',
   'menu:saveAs',
   'menu:find',
@@ -18,24 +20,17 @@ const incoming = [
 ];
 
 contextBridge.exposeInMainWorld('api', {
-  // File services (renderer -> main -> renderer)
+  sessionLoad: () => ipcRenderer.invoke('session:load'),
+  sessionSave: (state) => ipcRenderer.send('session:save', state),
+  notebookSave: (id, content) => ipcRenderer.send('notebook:save', { id, content }),
+  notebookDelete: (id) => ipcRenderer.send('notebook:delete', { id }),
   save: (payload) => ipcRenderer.invoke('file:save', payload),
   saveAs: (payload) => ipcRenderer.invoke('file:saveAs', payload),
-
-  // Perpetual-notebook autosave
-  saveScratch: (content) => ipcRenderer.send('scratch:save', content),
-
-  // One-way notifications renderer -> main
+  confirm: (opts) => ipcRenderer.invoke('dialog:confirm', opts),
   setDocState: (state) => ipcRenderer.send('doc:state', state),
   requestClose: () => ipcRenderer.send('window:close'),
-  newWindow: () => ipcRenderer.send('window:new'),
-  openDialog: () => ipcRenderer.send('window:openDialog'),
-
-  // Subscribe to main -> renderer events. Returns an unsubscribe fn.
   on: (channel, handler) => {
-    if (!incoming.includes(channel)) return () => {};
-    const listener = (_event, payload) => handler(payload);
-    ipcRenderer.on(channel, listener);
-    return () => ipcRenderer.removeListener(channel, listener);
+    if (!incoming.includes(channel)) return;
+    ipcRenderer.on(channel, (_event, payload) => handler(payload));
   },
 });

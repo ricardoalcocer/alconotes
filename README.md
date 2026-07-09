@@ -49,10 +49,11 @@ left off.
 | | |
 |---|---|
 | 📓 **Perpetual notebook** | Launches straight into your always-there note. Auto-saved continuously — never marked "unsaved", never nags you on quit. |
+| 🗂 **Tabs** | Mix perpetual notebook tabs with real files from disk in one window — the whole layout is restored on relaunch. |
 | ✍️ **Real Markdown editor** | CodeMirror 6 with live syntax highlighting, line numbers, active-line highlight, bracket matching & soft wrap. |
 | 👀 **Optional live preview** | A one-click toggle (or `⌘⇧P`) for a rendered side-by-side preview. Off by default — it's there when you want it. |
 | 🌗 **Native & theme-aware** | Hidden-inset title bar, system fonts, and automatic light/dark that follows macOS. |
-| 💾 **Save only if you want** | `⌘S` / Save As exports a `.md` copy without disturbing your notebook. `⌘N` opens a throwaway doc; `⌘O` opens any file. |
+| 💾 **Save only if you want** | `⌘S` on a notebook tab saves it to disk — the tab simply becomes that file. `⌘O` opens existing files in tabs. |
 | 🔎 **Find & Replace** | `⌘F` / `⌘⌥F` powered by CodeMirror's search. |
 | 🔠 **Toolbar & shortcuts** | Bold, italic, code, links, images, headings, lists & blockquotes — one click on the toolbar or one keystroke away. |
 | 📊 **Live status bar** | Line/column, selection length, word count & character count. |
@@ -100,23 +101,25 @@ Outputs to `release/`:
 Built for Apple Silicon (arm64). The app icon is generated into
 `build/icon.icns` and embedded automatically.
 
-## 📁 Where your note lives
+## 📁 Where your notes live
 
-Your perpetual notebook is a plain Markdown file:
+Every notebook tab is a plain Markdown file:
 
 ```
-~/Library/Application Support/AlcoNotes/scratch.md
+~/Library/Application Support/AlcoNotes/notebooks/*.md
 ```
 
-Back it up, `grep` it, symlink it into iCloud/Dropbox — it's just Markdown.
-The renderer autosaves it ~400 ms after you stop typing (and once more on close),
-so it survives quits without a save.
+(and the tab layout lives next to them in `session.json` — a pre-tabs
+`scratch.md` is migrated automatically on first launch). Back them up,
+`grep` them, symlink the folder into iCloud/Dropbox — it's just Markdown.
+Notebook tabs autosave ~400 ms after you stop typing (and once more on
+close), so they survive quits without a save.
 
 ## ⌨️ Keyboard shortcuts
 
 | Action | Shortcut | | Action | Shortcut |
 |---|---|---|---|---|
-| New | `⌘N` | | Toggle Preview | `⌘⇧P` |
+| New Tab | `⌘T` | | Toggle Preview | `⌘⇧P` |
 | Open | `⌘O` | | Editor only | `⌘⇧E` |
 | Save (export) | `⌘S` | | Preview only | `⌘⇧R` |
 | Save As | `⌘⇧S` | | Bold / Italic | `⌘B` / `⌘I` |
@@ -124,7 +127,7 @@ so it survives quits without a save.
 | Replace | `⌘⌥F` | | Heading 1–3 | `⌘1` · `⌘2` · `⌘3` |
 | Bulleted list | `⌘⇧8` | | Numbered list | `⌘⇧7` |
 | Blockquote | `⌘⇧.` | | Image | `⌘⇧I` |
-| Table | `⌘⇧T` | | | |
+| Table | `⌘⇧T` | | Close Tab | `⌘W` |
 
 ## 🧱 How it's built
 
@@ -143,7 +146,7 @@ so it survives quits without a save.
 - [x] Perpetual auto-saved notebook
 - [x] Live preview toggle
 - [x] Packaged `.app` / `.dmg` with a custom icon
-- [ ] **Tabs** for multiple documents
+- [x] **Tabs** — notebook tabs and file tabs, restored on relaunch
 - [ ] Optional custom notebook location (iCloud/Dropbox sync)
 - [ ] Export to HTML / PDF
 
