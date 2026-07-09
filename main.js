@@ -141,6 +141,13 @@ function createWindow() {
   win.loadFile('index.html');
   installContextMenu(win);
 
+  // window.open from the renderer (preview links, ⌘-click in the editor)
+  // goes to the default browser — never a new Electron window.
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (/^https?:|^mailto:/.test(url)) shell.openExternal(url);
+    return { action: 'deny' };
+  });
+
   win.once('ready-to-show', () => win.show());
 
   // Notebook tabs are auto-persisted; only dirty FILE tabs prompt on close.

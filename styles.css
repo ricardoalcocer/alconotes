@@ -226,6 +226,7 @@ html, body {
 
 /* CodeMirror fills its pane */
 .cm-editor { height: 100%; }
+.cm-editor.cm-cmd-link .cm-content { cursor: pointer; }
 .cm-scroller { font-family: var(--font-mono); }
 
 #preview {

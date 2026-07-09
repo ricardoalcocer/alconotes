@@ -8,7 +8,7 @@ import {
   defaultKeymap, history, historyKeymap, indentWithTab,
 } from '@codemirror/commands';
 import {
-  syntaxHighlighting, HighlightStyle, indentOnInput, bracketMatching,
+  syntaxHighlighting, HighlightStyle, indentOnInput, bracketMatching, syntaxTree,
 } from '@codemirror/language';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { languages } from '@codemirror/language-data';
@@ -151,6 +151,61 @@ const updateListener = EditorView.updateListener.of((v) => {
   }
 });
 
+// ---------------------------------------------------------------------------
+// ⌘-click a link in the editor to open it in the default browser
+// ---------------------------------------------------------------------------
+const BARE_URL_RE = /https?:\/\/[^\s<>()"']+[^\s<>()"'.,;:!?]/g;
+
+function normalizeUrl(url) {
+  if (/^https?:\/\//.test(url) || /^mailto:/.test(url)) return url;
+  if (/^www\./.test(url)) return `https://${url}`;
+  return null; // relative paths / placeholders like (url) — nothing to open
+}
+
+// Resolve the link under `pos`: Markdown links/images/autolinks via the
+// syntax tree (clicking anywhere on them counts), bare URLs via regex.
+function findLinkAt(ed, pos) {
+  const node = syntaxTree(ed.state).resolveInner(pos, 0);
+  for (let n = node; n; n = n.parent) {
+    if (n.name === 'URL') return normalizeUrl(ed.state.doc.sliceString(n.from, n.to));
+    if (n.name === 'Link' || n.name === 'Image' || n.name === 'Autolink') {
+      const urlNode = n.getChild('URL');
+      return urlNode ? normalizeUrl(ed.state.doc.sliceString(urlNode.from, urlNode.to)) : null;
+    }
+  }
+  const line = ed.state.doc.lineAt(pos);
+  BARE_URL_RE.lastIndex = 0;
+  let m;
+  while ((m = BARE_URL_RE.exec(line.text))) {
+    const from = line.from + m.index;
+    if (pos >= from && pos <= from + m[0].length) return normalizeUrl(m[0]);
+  }
+  return null;
+}
+
+const cmdClickLinks = EditorView.domEventHandlers({
+  mousedown(event, ed) {
+    if (!event.metaKey || event.button !== 0) return false;
+    const pos = ed.posAtCoords({ x: event.clientX, y: event.clientY });
+    if (pos == null) return false;
+    const url = findLinkAt(ed, pos);
+    if (!url) return false;
+    event.preventDefault();
+    window.open(url, '_blank');
+    return true; // swallow it — no extra cursor at the click point
+  },
+  // Pointer cursor while ⌘ is held over a link.
+  mousemove(event, ed) {
+    let over = false;
+    if (event.metaKey) {
+      const pos = ed.posAtCoords({ x: event.clientX, y: event.clientY });
+      over = pos != null && !!findLinkAt(ed, pos);
+    }
+    ed.dom.classList.toggle('cm-cmd-link', over);
+    return false;
+  },
+});
+
 function baseExtensions() {
   return [
     lineNumbersComp.of(showLineNumbers ? lineNumbers() : []),
@@ -167,6 +222,7 @@ function baseExtensions() {
     rectangularSelection(),
     crosshairCursor(),
     search({ top: true }),
+    cmdClickLinks,
     markdown({ base: markdownLanguage, codeLanguages: languages, addKeymap: true }),
     themeComp.of(makeThemeExtensions()),
     lineWrapComp.of(lineWrap ? EditorView.lineWrapping : []),
