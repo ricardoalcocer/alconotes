@@ -1,11 +1,27 @@
 'use strict';
 
-const { app, BrowserWindow, Menu, dialog, ipcMain, shell, nativeTheme } = require('electron');
+const { app, BrowserWindow, Menu, dialog, ipcMain, shell, nativeTheme, protocol } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const { installContextMenu } = require('./context-menu');
 
 const isMac = process.platform === 'darwin';
+
+// Local images dropped/pasted into the editor are copied into a sidecar
+// `<note>.assets/` folder and referenced by a relative path in the Markdown.
+// The preview can't load those via file:// (blocked by CSP), so they're served
+// through this privileged `asset://` scheme instead. Must be registered before
+// the app is ready.
+protocol.registerSchemesAsPrivileged([
+  { scheme: 'asset', privileges: { standard: true, secure: true, supportFetchAPI: true } },
+]);
+
+const IMAGE_MIME = {
+  png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif',
+  webp: 'image/webp', svg: 'image/svg+xml', bmp: 'image/bmp', avif: 'image/avif',
+  heic: 'image/heic', tif: 'image/tiff', tiff: 'image/tiff', ico: 'image/x-icon',
+};
 
 // Test hook: lets smoke tests point the app at a throwaway data dir.
 if (process.env.ALCONOTES_USER_DATA) app.setPath('userData', process.env.ALCONOTES_USER_DATA);
@@ -89,6 +105,52 @@ function deleteNotebook(id) {
   try {
     fs.unlinkSync(notebookPath(id));
   } catch {}
+}
+
+// ---- Sidecar image assets -------------------------------------------------
+// Resolve a tab descriptor ({kind, id?, path?}) to the note's on-disk path.
+// File tabs live wherever the user saved them; notebook tabs live under
+// userData/notebooks/. Either way, images go in a sibling `<name>.assets/`.
+function notePathFor(tab) {
+  if (!tab || typeof tab !== 'object') return null;
+  if (tab.kind === 'file' && typeof tab.path === 'string' && tab.path) return tab.path;
+  if (tab.kind === 'scratch' && NOTEBOOK_ID_RE.test(String(tab.id))) return notebookPath(String(tab.id));
+  return null;
+}
+
+function assetsDirFor(notePath) {
+  const dir = path.dirname(notePath);
+  const stem = path.basename(notePath, path.extname(notePath));
+  return path.join(dir, `${stem}.assets`);
+}
+
+function baseDirFor(tab) {
+  const notePath = notePathFor(tab);
+  return notePath ? path.dirname(notePath) : null;
+}
+
+// Copy raw image bytes into the note's sidecar assets folder, named by a short
+// content hash so identical drops/pastes de-duplicate. Returns the path to
+// embed in Markdown (relative to the note) plus the absolute path.
+function saveImageAsset(tab, bytes, ext) {
+  const notePath = notePathFor(tab);
+  if (!notePath) return { error: 'no note context' };
+  const buf = Buffer.from(bytes);
+  if (!buf.length) return { error: 'empty image' };
+  const safeExt = String(ext || 'png').toLowerCase().replace(/[^a-z0-9]/g, '') || 'png';
+  const hash = crypto.createHash('sha1').update(buf).digest('hex').slice(0, 12);
+  const fileName = `${hash}.${safeExt}`;
+  const assetsDir = assetsDirFor(notePath);
+  const absPath = path.join(assetsDir, fileName);
+  try {
+    fs.mkdirSync(assetsDir, { recursive: true });
+    if (!fs.existsSync(absPath)) fs.writeFileSync(absPath, buf);
+  } catch (err) {
+    return { error: String(err.message || err) };
+  }
+  // Forward slashes keep the Markdown portable across platforms.
+  const relPath = path.relative(path.dirname(notePath), absPath).split(path.sep).join('/');
+  return { relPath, absPath };
 }
 
 function writeSession(session) {
@@ -308,6 +370,11 @@ ipcMain.on('session:save', (_event, state) => {
 ipcMain.on('notebook:save', (_event, { id, content }) => writeNotebook(String(id), String(content ?? '')));
 ipcMain.on('notebook:delete', (_event, { id }) => deleteNotebook(String(id)));
 
+// ---- IPC: sidecar image assets ----
+
+ipcMain.handle('image:save', (_event, { tab, bytes, ext } = {}) => saveImageAsset(tab, bytes, ext));
+ipcMain.handle('image:baseDir', (_event, tab) => baseDirFor(tab));
+
 // ---- IPC: file save + dialogs ----
 
 function writeUserFile(win, target, content) {
@@ -510,6 +577,26 @@ function buildMenu() {
 
 app.whenReady().then(() => {
   appReady = true;
+
+  // Serve sidecar images to the preview. The renderer encodes an absolute path
+  // as `asset://local/<encoded-abs-path>`; we only ever serve files that live
+  // inside a `.assets/` folder, so a renderer bug can't turn this into an
+  // arbitrary-file reader.
+  protocol.handle('asset', async (request) => {
+    try {
+      const abs = decodeURIComponent(new URL(request.url).pathname.replace(/^\//, ''));
+      const normalized = abs.split(path.sep).join('/');
+      if (!/\.assets\/[^/]+$/.test(normalized)) {
+        return new Response('forbidden', { status: 403 });
+      }
+      const data = await fs.promises.readFile(abs);
+      const ext = path.extname(abs).slice(1).toLowerCase();
+      return new Response(data, { headers: { 'content-type': IMAGE_MIME[ext] || 'application/octet-stream' } });
+    } catch {
+      return new Response('not found', { status: 404 });
+    }
+  });
+
   nativeTheme.themeSource = themePref;
   buildMenu();
   createWindow();

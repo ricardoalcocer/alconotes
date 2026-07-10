@@ -24,6 +24,8 @@ contextBridge.exposeInMainWorld('api', {
   sessionSave: (state) => ipcRenderer.send('session:save', state),
   notebookSave: (id, content) => ipcRenderer.send('notebook:save', { id, content }),
   notebookDelete: (id) => ipcRenderer.send('notebook:delete', { id }),
+  imageSave: (payload) => ipcRenderer.invoke('image:save', payload),
+  imageBaseDir: (tab) => ipcRenderer.invoke('image:baseDir', tab),
   save: (payload) => ipcRenderer.invoke('file:save', payload),
   saveAs: (payload) => ipcRenderer.invoke('file:saveAs', payload),
   confirm: (opts) => ipcRenderer.invoke('dialog:confirm', opts),
