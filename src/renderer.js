@@ -39,8 +39,10 @@ md.core.ruler.push('task_lists', (state) => {
       || toks[i - 2].type !== 'list_item_open') continue;
     const first = toks[i].children[0];
     if (!first || first.type !== 'text') continue;
-    const m = /^\[([ xX])\] /.exec(first.content);
+    const m = /^\[([ xX])\](?: |$)/.exec(first.content);
     if (!m) continue;
+    // `[ ]` glued to markup (e.g. `[ ]**hi**`) is literal text, per GitHub.
+    if (!m[0].endsWith(' ') && toks[i].children.length > 1) continue;
     first.content = first.content.slice(m[0].length);
     const box = new state.Token('html_inline', '', 0);
     const line = toks[i - 2].map ? toks[i - 2].map[0] : -1;
@@ -869,7 +871,7 @@ function toggleTaskList() {
       if (seen.has(n)) continue;
       seen.add(n);
       const line = state.doc.line(n);
-      const task = /^(\s*)(?:[-*+]|\d+[.)]) \[[ xX]\] /.exec(line.text);
+      const task = /^(\s*)(?:[-*+]|\d+[.)]) \[[ xX]\] ?/.exec(line.text);
       if (task) {
         changes.push({ from: line.from + task[1].length, to: line.from + task[0].length, insert: '' });
         continue;

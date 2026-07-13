@@ -8,6 +8,7 @@
   --preview-bg: #fbfbfd;
   --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-mono: "SF Mono", ui-monospace, "JetBrains Mono", "Menlo", monospace;
+  color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,6 +20,7 @@
     --status-bg: #262628;
     --accent: #4aa3ff;
     --preview-bg: #232326;
+    color-scheme: dark;
   }
 }
 
