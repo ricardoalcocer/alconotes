@@ -56,6 +56,7 @@ left off.
 | 💾 **Save only if you want** | `⌘S` on a notebook tab saves it to disk — the tab simply becomes that file. `⌘O` opens existing files in tabs. |
 | ☑️ **Live checkboxes** | `- [ ]` task lists render as real checkboxes — tick one in the preview and it's checked off in the note itself. `⌘⇧X` turns any line into one. |
 | 🖼 **Drag & drop images** | Drop or paste an image into the editor — it's copied into a sidecar assets folder next to your note and inserted as plain Markdown. |
+| 🛟 **Automatic backups** | Notebooks are snapshotted hourly (and at every launch), and closing a notebook tab moves it to a trash folder instead of deleting it. **File → Open Backups Folder** takes you there. |
 | 🔎 **Find & Replace** | `⌘F` / `⌘⌥F` powered by CodeMirror's search. |
 | 🔠 **Toolbar & shortcuts** | Bold, italic, code, links, images, headings, lists, checkboxes & blockquotes — one click on the toolbar or one keystroke away. |
 | 📊 **Live status bar** | Line/column, selection length, word count & character count. |
@@ -152,6 +153,7 @@ close), so they survive quits without a save.
 - [x] **Tabs** — notebook tabs and file tabs, restored on relaunch
 - [x] **Checkboxes** — live task lists you can tick right in the preview
 - [x] **Images** — drag & drop / paste, stored in a sidecar assets folder
+- [x] **Backups** — hourly snapshots + trash instead of delete for closed notebooks
 - [ ] Optional custom notebook location (iCloud/Dropbox sync)
 - [ ] Export to HTML / PDF
 
