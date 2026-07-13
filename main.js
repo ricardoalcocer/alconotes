@@ -524,6 +524,7 @@ function buildMenu() {
         { type: 'separator' },
         { label: 'Bulleted List', accelerator: 'CmdOrCtrl+Shift+8', click: () => sendToFocused('menu:format', 'ul') },
         { label: 'Numbered List', accelerator: 'CmdOrCtrl+Shift+7', click: () => sendToFocused('menu:format', 'ol') },
+        { label: 'Checkbox', accelerator: 'CmdOrCtrl+Shift+X', click: () => sendToFocused('menu:format', 'task') },
         { label: 'Blockquote', accelerator: 'CmdOrCtrl+Shift+.', click: () => sendToFocused('menu:format', 'quote') },
       ],
     },

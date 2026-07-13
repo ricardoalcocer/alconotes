@@ -28,6 +28,30 @@ const md = new MarkdownIt({
   breaks: false,
 });
 
+// GFM task lists: render `- [ ]` / `- [x]` items as real checkboxes. Each one
+// carries its source line so clicking it in the preview can check it off in
+// the note itself.
+md.core.ruler.push('task_lists', (state) => {
+  const toks = state.tokens;
+  for (let i = 2; i < toks.length; i++) {
+    if (toks[i].type !== 'inline'
+      || toks[i - 1].type !== 'paragraph_open'
+      || toks[i - 2].type !== 'list_item_open') continue;
+    const first = toks[i].children[0];
+    if (!first || first.type !== 'text') continue;
+    const m = /^\[([ xX])\](?: |$)/.exec(first.content);
+    if (!m) continue;
+    // `[ ]` glued to markup (e.g. `[ ]**hi**`) is literal text, per GitHub.
+    if (!m[0].endsWith(' ') && toks[i].children.length > 1) continue;
+    first.content = first.content.slice(m[0].length);
+    const box = new state.Token('html_inline', '', 0);
+    const line = toks[i - 2].map ? toks[i - 2].map[0] : -1;
+    box.content = `<input type="checkbox" class="task-check" data-line="${line}"${m[1] === ' ' ? '' : ' checked'}> `;
+    toks[i].children.unshift(box);
+    toks[i - 2].attrJoin('class', 'task-item');
+  }
+});
+
 // ---------------------------------------------------------------------------
 // Syntax highlighting theme (adapts to light / dark — live, via a Compartment)
 // ---------------------------------------------------------------------------
@@ -592,6 +616,19 @@ function resolveLocalImages() {
   }
 }
 
+// Clicking a checkbox in the preview checks it off in the source note.
+previewEl.addEventListener('click', (e) => {
+  const box = e.target.closest('input.task-check');
+  if (!box) return;
+  const n = Number(box.dataset.line) + 1;
+  if (!Number.isInteger(n) || n < 1 || n > view.state.doc.lines) return;
+  const line = view.state.doc.line(n);
+  const m = /^(\s*(?:[-*+]|\d+[.)])\s+\[)[ xX]\]/.exec(line.text);
+  if (!m) return;
+  const at = line.from + m[1].length;
+  view.dispatch({ changes: { from: at, to: at + 1, insert: box.checked ? 'x' : ' ' } });
+});
+
 // Open external links in the default browser instead of navigating the app.
 previewEl.addEventListener('click', (e) => {
   const a = e.target.closest('a');
@@ -821,6 +858,36 @@ function numberedList() {
   view.focus();
 }
 
+// Toggle checkbox items on the selected lines: a plain line or a bullet
+// becomes `- [ ] …`; an existing task item reverts to plain text.
+function toggleTaskList() {
+  const state = view.state;
+  const changes = [];
+  const seen = new Set();
+  for (const r of state.selection.ranges) {
+    const startLine = state.doc.lineAt(r.from).number;
+    const endLine = state.doc.lineAt(r.to).number;
+    for (let n = startLine; n <= endLine; n++) {
+      if (seen.has(n)) continue;
+      seen.add(n);
+      const line = state.doc.line(n);
+      const task = /^(\s*)(?:[-*+]|\d+[.)]) \[[ xX]\] ?/.exec(line.text);
+      if (task) {
+        changes.push({ from: line.from + task[1].length, to: line.from + task[0].length, insert: '' });
+        continue;
+      }
+      const bullet = /^\s*(?:[-*+]|\d+[.)]) /.exec(line.text);
+      if (bullet) {
+        changes.push({ from: line.from + bullet[0].length, insert: '[ ] ' });
+      } else {
+        changes.push({ from: line.from + /^\s*/.exec(line.text)[0].length, insert: '- [ ] ' });
+      }
+    }
+  }
+  view.dispatch({ changes });
+  view.focus();
+}
+
 function insertLink() {
   const state = view.state;
   const r = state.selection.main;
@@ -880,6 +947,7 @@ function applyFormat(kind) {
     case 'h3': return setHeading(3);
     case 'ul': return prefixLines('- ');
     case 'ol': return numberedList();
+    case 'task': return toggleTaskList();
     case 'quote': return prefixLines('> ');
     default: break;
   }
