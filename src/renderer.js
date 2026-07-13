@@ -206,6 +206,88 @@ const cmdClickLinks = EditorView.domEventHandlers({
   },
 });
 
+// ---------------------------------------------------------------------------
+// Drop or paste an image → copy it into the note's sidecar assets folder and
+// insert a Markdown reference. No hosting, no hunting for the file.
+// ---------------------------------------------------------------------------
+const imageDropPaste = EditorView.domEventHandlers({
+  dragover(event) {
+    if (event.dataTransfer && Array.from(event.dataTransfer.types).includes('Files')) {
+      event.preventDefault(); // signal we accept the drop
+    }
+    return false;
+  },
+  drop(event, ed) {
+    const files = imageFilesFrom(event.dataTransfer);
+    if (!files.length) return false;
+    event.preventDefault();
+    const pos = ed.posAtCoords({ x: event.clientX, y: event.clientY });
+    insertDroppedImages(files, pos);
+    return true;
+  },
+  paste(event) {
+    const files = imageFilesFrom(event.clipboardData);
+    if (!files.length) return false;
+    event.preventDefault();
+    insertDroppedImages(files, view.state.selection.main.from);
+    return true;
+  },
+});
+
+function imageFilesFrom(dataTransfer) {
+  if (!dataTransfer || !dataTransfer.files) return [];
+  return Array.from(dataTransfer.files).filter((f) => f.type.startsWith('image/'));
+}
+
+function extForImage(file) {
+  const m = /\.([a-z0-9]+)$/i.exec(file.name || '');
+  if (m) return m[1].toLowerCase();
+  return ((file.type || '').split('/')[1] || 'png').replace('+xml', '');
+}
+
+function altForImage(file) {
+  const base = (file.name || '').replace(/\.[a-z0-9]+$/i, '').trim();
+  return base || 'image';
+}
+
+// Read each image, hand its bytes to main to store, then insert the returned
+// relative path. Images are inserted in order at the drop/caret position.
+async function insertDroppedImages(files, at) {
+  const tab = tabs[active];
+  if (!tab || !window.api || !window.api.imageSave) return;
+  let pos = typeof at === 'number' ? at : view.state.selection.main.from;
+  for (const file of files) {
+    let res;
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      res = await window.api.imageSave({ tab: tabRef(tab), bytes, ext: extForImage(file) });
+    } catch (err) {
+      res = { error: String(err) };
+    }
+    if (!res || res.error || !res.relPath) {
+      console.error('image insert failed:', res && res.error);
+      continue;
+    }
+    pos = insertImageAt(res.relPath, altForImage(file), pos);
+    // Cache the note's base dir so the preview can resolve the new image.
+    if (!tab.baseDir && res.absPath) tab.baseDir = res.absPath.replace(/[/\\][^/\\]*\.assets[/\\][^/\\]*$/, '');
+  }
+  renderPreview();
+  view.focus();
+}
+
+// Insert `![alt](relPath)` at `pos`; returns the position just after it so
+// callers can chain multiple inserts.
+function insertImageAt(relPath, alt, pos) {
+  const insert = `![${alt}](${relPath})`;
+  view.dispatch({
+    changes: { from: pos, to: pos, insert },
+    selection: { anchor: pos + insert.length },
+    scrollIntoView: true,
+  });
+  return pos + insert.length;
+}
+
 function baseExtensions() {
   return [
     lineNumbersComp.of(showLineNumbers ? lineNumbers() : []),
@@ -223,6 +305,7 @@ function baseExtensions() {
     crosshairCursor(),
     search({ top: true }),
     cmdClickLinks,
+    imageDropPaste,
     markdown({ base: markdownLanguage, codeLanguages: languages, addKeymap: true }),
     themeComp.of(makeThemeExtensions()),
     lineWrapComp.of(lineWrap ? EditorView.lineWrapping : []),
@@ -256,6 +339,25 @@ function textOf(tab) {
   return tab === tabs[active] ? view.state.doc.toString() : tab.state.doc.toString();
 }
 
+// A minimal descriptor main needs to locate the tab's note (and thus its
+// sidecar assets folder) on disk.
+function tabRef(tab) {
+  return { kind: tab.kind, id: tab.id, path: tab.path };
+}
+
+// Cache the active tab's note directory so the preview can resolve relative
+// image paths, then re-render. Base dir changes when a tab gains a file
+// identity (Save As), so this is re-run at those points.
+async function refreshActiveBaseDir() {
+  const tab = tabs[active];
+  if (!tab || !window.api || !window.api.imageBaseDir) return;
+  const dir = await window.api.imageBaseDir(tabRef(tab));
+  if (tabs[active] === tab) {
+    tab.baseDir = dir || null;
+    renderPreview();
+  }
+}
+
 // Compartments live per-EditorState, so re-apply the global toggles whenever
 // the view adopts another tab's state.
 function applyEditorPrefs() {
@@ -277,6 +379,7 @@ function activateTab() {
   updateStatus();
   notifyState();
   renderPreview();
+  refreshActiveBaseDir();
   saveSession();
   view.focus();
 }
@@ -465,6 +568,28 @@ function renderPreview() {
   previewTimer = null;
   if (workspace.classList.contains('view-editor')) return; // preview hidden
   previewEl.innerHTML = md.render(view.state.doc.toString());
+  resolveLocalImages();
+}
+
+// Markdown-it emits relative image paths (e.g. `note.assets/x.png`) verbatim,
+// which the sandboxed preview can't load from disk. Rewrite each to an
+// `asset://` URL resolved against the note's folder so main can serve it.
+function resolveLocalImages() {
+  const base = tabs[active] && tabs[active].baseDir;
+  for (const img of previewEl.querySelectorAll('img')) {
+    const src = img.getAttribute('src') || '';
+    if (/^(https?:|data:|asset:|blob:)/i.test(src)) continue;
+    let rel;
+    try {
+      rel = decodeURI(src);
+    } catch {
+      rel = src;
+    }
+    const abs = rel.startsWith('/')
+      ? rel
+      : (base ? `${base.replace(/\/$/, '')}/${rel}` : null);
+    if (abs) img.src = `asset://local/${encodeURIComponent(abs)}`;
+  }
 }
 
 // Open external links in the default browser instead of navigating the app.
@@ -593,8 +718,10 @@ async function saveTabAs(tab) {
   tab.name = res.name;
   tab.savedText = content;
   tab.dirty = false;
+  tab.baseDir = null; // note moved — re-resolve its sidecar folder
   renderTabs();
   notifyState();
+  refreshActiveBaseDir();
   saveSession();
   return true;
 }
@@ -898,6 +1025,7 @@ async function init() {
   renderTabs();
   updateStatus();
   notifyState();
+  refreshActiveBaseDir();
   view.focus();
 }
 
