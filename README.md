@@ -51,11 +51,11 @@ left off.
 | 📓 **Perpetual notebook** | Launches straight into your always-there note. Auto-saved continuously — never marked "unsaved", never nags you on quit. |
 | 🗂 **Tabs** | Mix perpetual notebook tabs with real files from disk in one window — the whole layout is restored on relaunch. |
 | ✍️ **Real Markdown editor** | CodeMirror 6 with live syntax highlighting, line numbers, active-line highlight, bracket matching & soft wrap. `⌘`-click any link to open it in your browser. |
-| 👀 **Optional live preview** | A one-click toggle (or `⌘⇧P`) for a rendered side-by-side preview. Off by default — it's there when you want it. |
+| 👀 **Optional live preview** | A one-click toggle (or `⌘⇧P`) for a rendered side-by-side preview. Off by default — it's there when you want it. Task-list checkboxes are live — tick one in the preview and it's checked off in the note. |
 | 🌗 **Native & theme-aware** | Hidden-inset title bar, system fonts, and light/dark that follows macOS — or force it in **View → Appearance** (remembered across launches). |
 | 💾 **Save only if you want** | `⌘S` on a notebook tab saves it to disk — the tab simply becomes that file. `⌘O` opens existing files in tabs. |
 | 🔎 **Find & Replace** | `⌘F` / `⌘⌥F` powered by CodeMirror's search. |
-| 🔠 **Toolbar & shortcuts** | Bold, italic, code, links, images, headings, lists & blockquotes — one click on the toolbar or one keystroke away. |
+| 🔠 **Toolbar & shortcuts** | Bold, italic, code, links, images, headings, lists, checkboxes & blockquotes — one click on the toolbar or one keystroke away. |
 | 📊 **Live status bar** | Line/column, selection length, word count & character count. |
 
 ## 📥 Get it
@@ -127,7 +127,8 @@ close), so they survive quits without a save.
 | Replace | `⌘⌥F` | | Heading 1–3 | `⌘1` · `⌘2` · `⌘3` |
 | Bulleted list | `⌘⇧8` | | Numbered list | `⌘⇧7` |
 | Blockquote | `⌘⇧.` | | Image | `⌘⇧I` |
-| Table | `⌘⇧T` | | Close Tab | `⌘W` |
+| Table | `⌘⇧T` | | Checkbox | `⌘⇧X` |
+| Close Tab | `⌘W` | | | |
 
 ## 🧱 How it's built
 
