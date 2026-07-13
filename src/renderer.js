@@ -425,12 +425,17 @@ function renderTabs() {
     const name = document.createElement('span');
     name.className = 'tab-name';
     name.textContent = tab.name;
+    // ⌘1–⌘8 hit tabs 1–8; ⌘9 always hits the last tab.
+    const keyNum = i < 8 ? i + 1 : (i === tabs.length - 1 ? 9 : null);
+    const key = document.createElement('span');
+    key.className = 'tab-key';
+    if (keyNum) key.textContent = `⌘${keyNum}`;
     const close = document.createElement('span');
     close.className = 'tab-close';
     close.textContent = '×';
     close.title = 'Close Tab (⌘W)';
 
-    el.append(dot, name, close);
+    el.append(dot, name, key, close);
     el.addEventListener('mousedown', (e) => {
       if (e.button !== 0 || e.target === close) return;
       switchTab(i);
