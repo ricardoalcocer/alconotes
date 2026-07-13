@@ -126,11 +126,11 @@ close), so they survive quits without a save.
 | Save (export) | `⌘S` | | Preview only | `⌘⇧R` |
 | Save As | `⌘⇧S` | | Bold / Italic | `⌘B` / `⌘I` |
 | Find | `⌘F` | | Inline Code / Link | `⌘K` / `⌘⇧K` |
-| Replace | `⌘⌥F` | | Heading 1–3 | `⌘1` · `⌘2` · `⌘3` |
+| Replace | `⌘⌥F` | | Heading 1–3 | `⌘⌥1` · `⌘⌥2` · `⌘⌥3` |
 | Bulleted list | `⌘⇧8` | | Numbered list | `⌘⇧7` |
 | Blockquote | `⌘⇧.` | | Image | `⌘⇧I` |
 | Table | `⌘⇧T` | | Checkbox | `⌘⇧X` |
-| Close Tab | `⌘W` | | | |
+| Close Tab | `⌘W` | | Go to Tab 1–9 | `⌘1`–`⌘9` (`⌘9` = last) |
 
 ## 🧱 How it's built
 

@@ -1046,6 +1046,15 @@ window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !tablePicker.hidden) hideTablePicker();
 });
 
+// Browser-style tab switching: ⌘1–⌘8 jump to that tab, ⌘9 to the last.
+window.addEventListener('keydown', (e) => {
+  if (!e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+  if (e.key < '1' || e.key > '9') return;
+  e.preventDefault();
+  const i = e.key === '9' ? tabs.length - 1 : Number(e.key) - 1;
+  if (tabs[i]) switchTab(i);
+});
+
 function toggleLineNumbers() {
   showLineNumbers = !showLineNumbers;
   view.dispatch({ effects: lineNumbersComp.reconfigure(showLineNumbers ? lineNumbers() : []) });
