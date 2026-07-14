@@ -1,6 +1,6 @@
 'use strict';
 
-const { app, BrowserWindow, Menu, Tray, dialog, ipcMain, shell, nativeTheme, protocol } = require('electron');
+const { app, BrowserWindow, Menu, Tray, dialog, ipcMain, shell, nativeTheme, protocol, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -263,6 +263,22 @@ function setTheme(theme) {
   writeSettings({ theme });
 }
 
+// The window reopens where you left it. Bounds are validated against the
+// current displays so a disconnected monitor can't strand the window
+// off-screen — then we fall back to the default size, centered.
+function savedWindowBounds() {
+  const b = readSettings().windowBounds;
+  if (!b || ![b.x, b.y, b.width, b.height].every(Number.isFinite)) return null;
+  if (b.width < 480 || b.height < 320) return null;
+  const visible = screen.getAllDisplays().some((d) => {
+    const a = d.workArea;
+    const ix = Math.min(b.x + b.width, a.x + a.width) - Math.max(b.x, a.x);
+    const iy = Math.min(b.y + b.height, a.y + a.height) - Math.max(b.y, a.y);
+    return ix > 120 && iy > 80;
+  });
+  return visible ? b : null;
+}
+
 /** @type {BrowserWindow | null} */
 let mainWindow = null;
 
@@ -271,9 +287,11 @@ const pendingOpenFiles = [];
 let appReady = false;
 
 function createWindow() {
+  const bounds = savedWindowBounds();
   const win = new BrowserWindow({
-    width: 900,
-    height: 720,
+    width: bounds ? bounds.width : 900,
+    height: bounds ? bounds.height : 720,
+    ...(bounds ? { x: bounds.x, y: bounds.y } : {}),
     minWidth: 480,
     minHeight: 320,
     show: false,
@@ -298,6 +316,22 @@ function createWindow() {
   });
 
   win.once('ready-to-show', () => win.show());
+
+  // Remember geometry as it changes (debounced) and once more on close.
+  // getNormalBounds() sees through maximization; full screen is skipped.
+  let boundsTimer = null;
+  const rememberBounds = () => {
+    if (boundsTimer) clearTimeout(boundsTimer);
+    boundsTimer = setTimeout(() => {
+      boundsTimer = null;
+      if (!win.isDestroyed() && !win.isFullScreen()) writeSettings({ windowBounds: win.getNormalBounds() });
+    }, 400);
+  };
+  win.on('resize', rememberBounds);
+  win.on('move', rememberBounds);
+  win.on('close', () => {
+    if (!win.isFullScreen()) writeSettings({ windowBounds: win.getNormalBounds() });
+  });
 
   // Notebook tabs are auto-persisted; only dirty FILE tabs prompt on close.
   win.on('close', (e) => {
