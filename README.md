@@ -166,4 +166,4 @@ close), so they survive quits without a save.
 
 [MIT](https://alco.mit-license.org) © [Ricardo Alcocer](https://github.com/ricardoalcocer)
 
-<div align="center"><sub>Built with ☕ and Markdown.</sub></div>
+<div align="center"><sub>Built with ☕ and Markdown, during a roadtrip through Park City, Bryce Canyon, Lone Rock and Mesa Verde 🏜️</sub></div>
