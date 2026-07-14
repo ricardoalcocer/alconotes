@@ -57,6 +57,7 @@ left off.
 | ☑️ **Live checkboxes** | `- [ ]` task lists render as real checkboxes — tick one in the preview and it's checked off in the note itself. `⌘⇧X` turns any line into one. |
 | 🖼 **Drag & drop images** | Drop or paste an image into the editor — it's copied into a sidecar assets folder next to your note and inserted as plain Markdown. |
 | 📂 **Opens from Finder** | Registered as a Markdown editor — right-click a `.md` file → **Open With → Buffer**, or make it the default (Get Info → Change All…). |
+| 🛟 **Automatic backups** | Notebooks are snapshotted hourly (and at every launch), and closing a notebook tab moves it to a trash folder instead of deleting it. **File → Open Backups Folder** takes you there. |
 | 🔎 **Find & Replace** | `⌘F` / `⌘⌥F` powered by CodeMirror's search. |
 | 🔠 **Toolbar & shortcuts** | Bold, italic, code, links, images, headings, lists, checkboxes & blockquotes — one click on the toolbar or one keystroke away. |
 | 📊 **Live status bar** | Line/column, selection length, word count & character count. |
@@ -154,6 +155,7 @@ close), so they survive quits without a save.
 - [x] **Checkboxes** — live task lists you can tick right in the preview
 - [x] **Images** — drag & drop / paste, stored in a sidecar assets folder
 - [x] **Open With…** — double-click `.md` files in Finder
+- [x] **Backups** — hourly snapshots + trash instead of delete for closed notebooks
 - [ ] Optional custom notebook location (iCloud/Dropbox sync)
 - [ ] Export to HTML / PDF
 

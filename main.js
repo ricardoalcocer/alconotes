@@ -37,6 +37,15 @@ const LEGACY_SCRATCH_PATH = path.join(USER_DATA, 'scratch.md');
 
 const SETTINGS_PATH = path.join(USER_DATA, 'settings.json');
 
+// ---- Safety net -----------------------------------------------------------
+// Closed notebook tabs are moved to notebooks/.trash/ instead of being
+// deleted, and the whole notebook set is snapshotted into userData/backups/
+// at launch and hourly while running. Both are size-capped, newest kept.
+const BACKUPS_DIR = path.join(USER_DATA, 'backups');
+const BACKUP_INTERVAL_MS = 60 * 60 * 1000;
+const BACKUP_KEEP = 20;
+const TRASH_KEEP = 50;
+
 // One-time migration: the app used to be called AlcoNotes, and the userData
 // folder follows the product name. Copy the old data over on first launch
 // (the old folder is left in place as a backup). The env overrides exist for
@@ -100,11 +109,56 @@ function writeNotebook(id, content) {
   }
 }
 
+function timestamp() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+}
+
+// Drop all but the `keep` newest entries in a directory.
+function pruneDir(dir, keep) {
+  try {
+    fs.readdirSync(dir)
+      .map((f) => ({ f, t: fs.statSync(path.join(dir, f)).mtimeMs }))
+      .sort((a, b) => b.t - a.t)
+      .slice(keep)
+      .forEach(({ f }) => fs.rmSync(path.join(dir, f), { recursive: true, force: true }));
+  } catch {}
+}
+
+const TRASH_DIR = path.join(NOTEBOOKS_DIR, '.trash');
+
 function deleteNotebook(id) {
   if (!NOTEBOOK_ID_RE.test(id)) return;
   try {
-    fs.unlinkSync(notebookPath(id));
-  } catch {}
+    const src = notebookPath(id);
+    if (!fs.existsSync(src)) return;
+    const ts = timestamp();
+    fs.mkdirSync(TRASH_DIR, { recursive: true });
+    fs.renameSync(src, path.join(TRASH_DIR, `${id}-${ts}.md`));
+    const assets = assetsDirFor(src);
+    if (fs.existsSync(assets)) fs.renameSync(assets, path.join(TRASH_DIR, `${id}-${ts}.assets`));
+    pruneDir(TRASH_DIR, TRASH_KEEP);
+  } catch (err) {
+    console.error('notebook trash failed:', err);
+  }
+}
+
+function backupNow() {
+  try {
+    if (!fs.existsSync(SESSION_PATH) && !fs.existsSync(NOTEBOOKS_DIR)) return;
+    const dest = path.join(BACKUPS_DIR, timestamp());
+    fs.mkdirSync(dest, { recursive: true });
+    if (fs.existsSync(SESSION_PATH)) fs.copyFileSync(SESSION_PATH, path.join(dest, 'session.json'));
+    if (fs.existsSync(NOTEBOOKS_DIR)) {
+      for (const f of fs.readdirSync(NOTEBOOKS_DIR)) {
+        if (f.endsWith('.md')) fs.copyFileSync(path.join(NOTEBOOKS_DIR, f), path.join(dest, f));
+      }
+    }
+    pruneDir(BACKUPS_DIR, BACKUP_KEEP);
+  } catch (err) {
+    console.error('backup failed:', err);
+  }
 }
 
 // ---- Sidecar image assets -------------------------------------------------
@@ -491,6 +545,14 @@ function buildMenu() {
         { type: 'separator' },
         { label: 'Close Tab', accelerator: 'CmdOrCtrl+W', click: () => sendToFocused('menu:closeTab') },
         { label: 'Close Window', accelerator: 'CmdOrCtrl+Shift+W', role: 'close' },
+        { type: 'separator' },
+        {
+          label: 'Open Backups Folder',
+          click: () => {
+            try { fs.mkdirSync(BACKUPS_DIR, { recursive: true }); } catch {}
+            shell.openPath(BACKUPS_DIR);
+          },
+        },
       ],
     },
     {
@@ -597,6 +659,11 @@ app.whenReady().then(() => {
       return new Response('not found', { status: 404 });
     }
   });
+
+  // Snapshot the notebook data before the renderer gets a chance to touch
+  // it, then again every hour while the app is running.
+  backupNow();
+  setInterval(backupNow, BACKUP_INTERVAL_MS);
 
   nativeTheme.themeSource = themePref;
   buildMenu();
