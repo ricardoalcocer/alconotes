@@ -263,6 +263,17 @@ function setTheme(theme) {
   writeSettings({ theme });
 }
 
+// Float the notebook over every other window — the sticky note that stays
+// stuck. 'floating' level keeps it above normal windows without fighting
+// full-screen apps.
+let alwaysOnTop = !!readSettings().alwaysOnTop;
+
+function setAlwaysOnTop(v) {
+  alwaysOnTop = !!v;
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.setAlwaysOnTop(alwaysOnTop, 'floating');
+  writeSettings({ alwaysOnTop });
+}
+
 // The window reopens where you left it. Bounds are validated against the
 // current displays so a disconnected monitor can't strand the window
 // off-screen — then we fall back to the default size, centered.
@@ -306,6 +317,7 @@ function createWindow() {
   });
 
   win.loadFile('index.html');
+  if (alwaysOnTop) win.setAlwaysOnTop(true, 'floating');
   installContextMenu(win);
 
   // window.open from the renderer (preview links, ⌘-click in the editor)
@@ -737,6 +749,15 @@ function buildMenu() {
     {
       label: 'Window',
       submenu: [
+        {
+          id: 'always-on-top',
+          label: 'Always on Top',
+          type: 'checkbox',
+          accelerator: 'CmdOrCtrl+Alt+T',
+          checked: alwaysOnTop,
+          click: (item) => setAlwaysOnTop(item.checked),
+        },
+        { type: 'separator' },
         { role: 'minimize' },
         { role: 'zoom' },
         ...(isMac ? [{ type: 'separator' }, { role: 'front' }] : [{ role: 'close' }]),
