@@ -1,6 +1,6 @@
 'use strict';
 
-const { app, BrowserWindow, Menu, dialog, ipcMain, shell, nativeTheme, protocol } = require('electron');
+const { app, BrowserWindow, Menu, Tray, dialog, ipcMain, shell, nativeTheme, protocol } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -340,6 +340,39 @@ function withWindow(fn) {
     fn(win);
   }
   return win;
+}
+
+// ---- Menu bar (tray) icon ---------------------------------------------------
+// Buffer keeps running when the window closes (standard macOS behavior); the
+// tray icon makes that useful: left-click summons the notebook from anywhere,
+// right-click gets a small menu. Wired manually — setContextMenu() would
+// swallow the left click on macOS.
+let tray = null;
+
+function showWindow() {
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+  } else {
+    createWindow(); // shows itself on ready-to-show, session restored
+  }
+}
+
+function createTray() {
+  tray = new Tray(path.join(__dirname, 'assets', 'trayTemplate.png'));
+  tray.setToolTip('Buffer');
+  const menu = Menu.buildFromTemplate([
+    { label: 'Open Buffer', click: () => showWindow() },
+    {
+      label: 'New Notebook Tab',
+      click: () => withWindow((w) => { w.show(); w.webContents.send('menu:newTab'); }),
+    },
+    { type: 'separator' },
+    { label: 'Quit Buffer', role: 'quit' },
+  ]);
+  tray.on('click', () => showWindow());
+  tray.on('right-click', () => tray.popUpContextMenu(menu));
 }
 
 // Open files as tabs (menu Open…, recent documents, macOS "Open With").
@@ -717,6 +750,11 @@ app.whenReady().then(() => {
 
   nativeTheme.themeSource = themePref;
   buildMenu();
+  createTray();
+  if (process.env.ALCONOTES_TEST_HOOKS) {
+    app.__tray = tray;
+    app.__showWindow = showWindow;
+  }
   createWindow();
   if (pendingOpenFiles.length) {
     sendOpenFiles(pendingOpenFiles.splice(0));

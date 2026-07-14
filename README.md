@@ -57,25 +57,12 @@ left off.
 | ☑️ **Live checkboxes** | `- [ ]` task lists render as real checkboxes — tick one in the preview and it's checked off in the note itself. `⌘⇧X` turns any line into one. |
 | 🖼 **Drag & drop images** | Drop or paste an image into the editor — it's copied into a sidecar assets folder next to your note and inserted as plain Markdown. |
 | 📂 **Opens from Finder** | Registered as a Markdown editor — right-click a `.md` file → **Open With → Buffer**, or make it the default (Get Info → Change All…). |
+| 🚥 **Lives in your menu bar** | Closing the window doesn't kill your flow — Buffer keeps running with a menu bar icon. One click summons the notebook right back. |
 | 🛟 **Automatic backups** | Notebooks are snapshotted hourly (and at every launch), and closing a notebook tab moves it to a trash folder instead of deleting it. **File → Open Backups Folder** takes you there. |
 | 🔎 **Find & Replace** | `⌘F` / `⌘⌥F` powered by CodeMirror's search. |
 | 📄 **Export as PDF** | `⌘⌥P` renders the note — images, checkboxes, tables and all — into a clean print-styled PDF. |
 | 🔠 **Toolbar & shortcuts** | Bold, italic, code, links, images, headings, lists, checkboxes & blockquotes — one click on the toolbar or one keystroke away. |
 | 📊 **Live status bar** | Line/column, selection length, word count & character count. |
-
-## 📥 Get it
-
-Grab a build from [**Releases**](https://github.com/ricardoalcocer/alconotes/releases),
-or build it yourself below.
-
-> ℹ️ Builds are unsigned (not notarized), so macOS quarantines **downloaded** copies —
-> on recent macOS they may even report as "damaged". Clear the flag with:
->
-> ```bash
-> xattr -dr com.apple.quarantine /Applications/Buffer.app
-> ```
->
-> Builds you compile yourself (`npm run dist`) are never quarantined.
 
 ## 🛠️ Develop
 
@@ -160,6 +147,7 @@ close), so they survive quits without a save.
 - [x] **Backups** — hourly snapshots + trash instead of delete for closed notebooks
 - [ ] Optional custom notebook location (iCloud/Dropbox sync)
 - [x] **Export to PDF** — print-quality export of the rendered note
+- [x] **Menu bar icon** — Buffer stays running with the window closed; one click brings it back
 - [ ] Export to HTML
 
 ## 📄 License
