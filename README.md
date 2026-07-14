@@ -59,6 +59,7 @@ left off.
 | 📂 **Opens from Finder** | Registered as a Markdown editor — right-click a `.md` file → **Open With → Buffer**, or make it the default (Get Info → Change All…). |
 | 🛟 **Automatic backups** | Notebooks are snapshotted hourly (and at every launch), and closing a notebook tab moves it to a trash folder instead of deleting it. **File → Open Backups Folder** takes you there. |
 | 🔎 **Find & Replace** | `⌘F` / `⌘⌥F` powered by CodeMirror's search. |
+| 📄 **Export as PDF** | `⌘⌥P` renders the note — images, checkboxes, tables and all — into a clean print-styled PDF. |
 | 🔠 **Toolbar & shortcuts** | Bold, italic, code, links, images, headings, lists, checkboxes & blockquotes — one click on the toolbar or one keystroke away. |
 | 📊 **Live status bar** | Line/column, selection length, word count & character count. |
 
@@ -133,6 +134,7 @@ close), so they survive quits without a save.
 | Blockquote | `⌘⇧.` | | Image | `⌘⇧I` |
 | Table | `⌘⇧T` | | Checkbox | `⌘⇧X` |
 | Close Tab | `⌘W` | | Go to Tab 1–9 | `⌘1`–`⌘9` (`⌘9` = last) |
+| Export as PDF | `⌘⌥P` | | | |
 
 ## 🧱 How it's built
 
@@ -157,7 +159,8 @@ close), so they survive quits without a save.
 - [x] **Open With…** — double-click `.md` files in Finder
 - [x] **Backups** — hourly snapshots + trash instead of delete for closed notebooks
 - [ ] Optional custom notebook location (iCloud/Dropbox sync)
-- [ ] Export to HTML / PDF
+- [x] **Export to PDF** — print-quality export of the rendered note
+- [ ] Export to HTML
 
 ## 📄 License
 

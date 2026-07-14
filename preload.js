@@ -17,6 +17,7 @@ const incoming = [
   'menu:viewMode',
   'menu:toggleLineNumbers',
   'menu:toggleLineWrap',
+  'menu:exportPdf',
 ];
 
 contextBridge.exposeInMainWorld('api', {
@@ -28,6 +29,7 @@ contextBridge.exposeInMainWorld('api', {
   imageBaseDir: (tab) => ipcRenderer.invoke('image:baseDir', tab),
   save: (payload) => ipcRenderer.invoke('file:save', payload),
   saveAs: (payload) => ipcRenderer.invoke('file:saveAs', payload),
+  exportPdf: (payload) => ipcRenderer.invoke('export:pdf', payload),
   confirm: (opts) => ipcRenderer.invoke('dialog:confirm', opts),
   setDocState: (state) => ipcRenderer.send('doc:state', state),
   requestClose: () => ipcRenderer.send('window:close'),

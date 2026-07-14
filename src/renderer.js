@@ -603,9 +603,9 @@ function renderPreview() {
 // Markdown-it emits relative image paths (e.g. `note.assets/x.png`) verbatim,
 // which the sandboxed preview can't load from disk. Rewrite each to an
 // `asset://` URL resolved against the note's folder so main can serve it.
-function resolveLocalImages() {
+function resolveLocalImages(root = previewEl) {
   const base = tabs[active] && tabs[active].baseDir;
-  for (const img of previewEl.querySelectorAll('img')) {
+  for (const img of root.querySelectorAll('img')) {
     const src = img.getAttribute('src') || '';
     if (/^(https?:|data:|asset:|blob:)/i.test(src)) continue;
     let rel;
@@ -619,6 +619,57 @@ function resolveLocalImages() {
       : (base ? `${base.replace(/\/$/, '')}/${rel}` : null);
     if (abs) img.src = `asset://local/${encodeURIComponent(abs)}`;
   }
+}
+
+// ---- Export as PDF ----------------------------------------------------------
+// The note is re-rendered standalone (same markdown-it pipeline as the
+// preview) into a self-contained HTML document with a light print stylesheet;
+// main turns that into a PDF in a hidden window.
+const EXPORT_CSS = `
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body.markdown-body {
+  margin: 0; padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  font-size: 12.5px; line-height: 1.6; color: #1f2328;
+}
+h1, h2, h3, h4, h5, h6 { margin: 1.4em 0 0.5em; line-height: 1.25; font-weight: 600; }
+h1 { font-size: 2em; padding-bottom: 0.3em; border-bottom: 1px solid #d1d9e0; }
+h2 { font-size: 1.5em; padding-bottom: 0.3em; border-bottom: 1px solid #d1d9e0; }
+h3 { font-size: 1.25em; }
+h1:first-child, h2:first-child, h3:first-child { margin-top: 0; }
+p, ul, ol, blockquote, pre, table { margin: 0 0 0.9em; }
+a { color: #0969da; text-decoration: none; }
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em; background: #f0f1f3; border-radius: 4px; padding: 0.15em 0.35em;
+}
+pre { background: #f6f8fa; border-radius: 6px; padding: 12px 14px; overflow-x: auto; }
+pre code { background: none; padding: 0; font-size: 0.95em; }
+blockquote { border-left: 3px solid #d1d9e0; color: #59636e; padding: 0 1em; margin: 0 0 0.9em; }
+img { max-width: 100%; }
+hr { border: none; border-top: 1px solid #d1d9e0; margin: 1.5em 0; }
+table { border-collapse: collapse; }
+th, td { border: 1px solid #d1d9e0; padding: 5px 10px; }
+th { background: #f6f8fa; }
+ul, ol { padding-left: 1.8em; }
+li.task-item { list-style-type: none; }
+input.task-check { width: 13px; height: 13px; margin: 0 0.45em 0.15em -1.5em; vertical-align: middle; }
+`;
+
+function exportPdf() {
+  const tab = tabs[active];
+  if (!tab || !window.api || !window.api.exportPdf) return;
+  const root = document.createElement('div');
+  root.innerHTML = md.render(view.state.doc.toString());
+  resolveLocalImages(root);
+  // Checkboxes stay visible in the PDF but shouldn't look interactive.
+  for (const box of root.querySelectorAll('input.task-check')) box.setAttribute('disabled', '');
+  const title = (tab.name || 'Untitled').replace(/\.(md|markdown|mdown|mkd|mdtext|txt|text)$/i, '');
+  const html = '<!doctype html><html><head><meta charset="utf-8"><title>'
+    + md.utils.escapeHtml(title) + '</title><style>' + EXPORT_CSS + '</style></head><body class="markdown-body">'
+    + root.innerHTML + '</body></html>';
+  window.api.exportPdf({ html, defaultName: `${title}.pdf` });
 }
 
 // Clicking a checkbox in the preview checks it off in the source note.
@@ -1095,6 +1146,7 @@ if (window.api) {
   window.api.on('menu:viewMode', (mode) => setViewMode(mode));
   window.api.on('menu:toggleLineNumbers', () => toggleLineNumbers());
   window.api.on('menu:toggleLineWrap', () => toggleLineWrap());
+  window.api.on('menu:exportPdf', () => exportPdf());
 }
 
 // ---------------------------------------------------------------------------
