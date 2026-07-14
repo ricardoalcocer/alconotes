@@ -164,6 +164,6 @@ close), so they survive quits without a save.
 
 ## 📄 License
 
-[MIT](LICENSE) © [Ricardo Alcocer](https://github.com/ricardoalcocer)
+[MIT](https://alco.mit-license.org) © [Ricardo Alcocer](https://github.com/ricardoalcocer)
 
 <div align="center"><sub>Built with ☕ and Markdown.</sub></div>
