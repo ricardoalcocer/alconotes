@@ -19,6 +19,22 @@
     "directories": {
       "output": "release"
     },
+    "fileAssociations": [
+      {
+        "ext": ["md", "markdown", "mdown", "mkd", "mdtext"],
+        "name": "Markdown Document",
+        "description": "Markdown Document",
+        "role": "Editor",
+        "rank": "Default"
+      },
+      {
+        "ext": ["txt", "text"],
+        "name": "Plain Text Document",
+        "description": "Plain Text Document",
+        "role": "Editor",
+        "rank": "Alternate"
+      }
+    ],
     "files": [
       "main.js",
       "context-menu.js",

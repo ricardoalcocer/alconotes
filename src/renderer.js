@@ -1073,8 +1073,16 @@ function toggleLineWrap() {
 // ---------------------------------------------------------------------------
 // Wire up menu events from main
 // ---------------------------------------------------------------------------
+// Files can arrive (macOS "Open With") before init() has restored the
+// session — init() replaces the tab list wholesale, so hold them until then.
+let booted = false;
+const filesBeforeBoot = [];
+
 if (window.api) {
-  window.api.on('tab:openFiles', (files) => addFileTabs(files));
+  window.api.on('tab:openFiles', (files) => {
+    if (booted) addFileTabs(files);
+    else filesBeforeBoot.push(...files);
+  });
   window.api.on('window:saveAllAndClose', () => saveAllAndClose());
   window.api.on('menu:newTab', () => newScratchTab());
   window.api.on('menu:closeTab', () => closeTab(active));
@@ -1108,6 +1116,8 @@ async function init() {
   updateStatus();
   notifyState();
   refreshActiveBaseDir();
+  booted = true;
+  if (filesBeforeBoot.length) addFileTabs(filesBeforeBoot.splice(0));
   view.focus();
 }
 
