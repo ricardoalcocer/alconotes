@@ -145,9 +145,10 @@ close), so they survive quits without a save.
 - [x] **Images** — drag & drop / paste, stored in a sidecar assets folder
 - [x] **Open With…** — double-click `.md` files in Finder
 - [x] **Backups** — hourly snapshots + trash instead of delete for closed notebooks
-- [ ] Optional custom notebook location (iCloud/Dropbox sync)
 - [x] **Export to PDF** — print-quality export of the rendered note
 - [x] **Menu bar icon** — Buffer stays running with the window closed; one click brings it back
+- [x] **Window memory** — reopens at the position and size you left it
+- [ ] Optional custom notebook location (iCloud/Dropbox sync)
 - [ ] Export to HTML
 
 ## 📄 License
