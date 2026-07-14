@@ -58,6 +58,7 @@ left off.
 | 🖼 **Drag & drop images** | Drop or paste an image into the editor — it's copied into a sidecar assets folder next to your note and inserted as plain Markdown. |
 | 📂 **Opens from Finder** | Registered as a Markdown editor — right-click a `.md` file → **Open With → Buffer**, or make it the default (Get Info → Change All…). |
 | 🚥 **Lives in your menu bar** | Closing the window doesn't kill your flow — Buffer keeps running with a menu bar icon. One click summons the notebook right back. |
+| 📌 **Always on Top** | Pin the notebook over every other window — **Window → Always on Top** (`⌘⌥T`), remembered across launches. |
 | 🛟 **Automatic backups** | Notebooks are snapshotted hourly (and at every launch), and closing a notebook tab moves it to a trash folder instead of deleting it. **File → Open Backups Folder** takes you there. |
 | 🔎 **Find & Replace** | `⌘F` / `⌘⌥F` powered by CodeMirror's search. |
 | 📄 **Export as PDF** | `⌘⌥P` renders the note — images, checkboxes, tables and all — into a clean print-styled PDF. |
@@ -121,7 +122,7 @@ close), so they survive quits without a save.
 | Blockquote | `⌘⇧.` | | Image | `⌘⇧I` |
 | Table | `⌘⇧T` | | Checkbox | `⌘⇧X` |
 | Close Tab | `⌘W` | | Go to Tab 1–9 | `⌘1`–`⌘9` (`⌘9` = last) |
-| Export as PDF | `⌘⌥P` | | | |
+| Export as PDF | `⌘⌥P` | | Always on Top | `⌘⌥T` |
 
 ## 🧱 How it's built
 
@@ -148,6 +149,7 @@ close), so they survive quits without a save.
 - [x] **Export to PDF** — print-quality export of the rendered note
 - [x] **Menu bar icon** — Buffer stays running with the window closed; one click brings it back
 - [x] **Window memory** — reopens at the position and size you left it
+- [x] **Always on Top** — pin the notebook above every other window
 - [ ] Optional custom notebook location (iCloud/Dropbox sync)
 - [ ] Export to HTML
 
