@@ -373,6 +373,55 @@ ipcMain.on('notebook:delete', (_event, { id }) => deleteNotebook(String(id)));
 // ---- IPC: sidecar image assets ----
 
 ipcMain.handle('image:save', (_event, { tab, bytes, ext } = {}) => saveImageAsset(tab, bytes, ext));
+
+// ---- IPC: PDF export ----
+// The renderer hands us a fully self-contained HTML document (styles inlined,
+// images already rewritten to asset:// URLs). It's rendered in a hidden
+// window and printed to PDF. An explicit `path` skips the save dialog (tests).
+ipcMain.handle('export:pdf', async (event, { html, defaultName, path: explicitPath } = {}) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  let target = typeof explicitPath === 'string' && explicitPath ? explicitPath : null;
+  if (!target) {
+    const { canceled, filePath } = await dialog.showSaveDialog(win, {
+      defaultPath: defaultName || 'Untitled.pdf',
+      filters: [{ name: 'PDF', extensions: ['pdf'] }],
+    });
+    if (canceled || !filePath) return { ok: false, canceled: true };
+    target = filePath;
+  }
+  const tmpHtml = path.join(app.getPath('temp'), `buffer-export-${crypto.randomBytes(6).toString('hex')}.html`);
+  let worker = null;
+  try {
+    fs.writeFileSync(tmpHtml, String(html ?? ''), 'utf-8');
+    worker = new BrowserWindow({ show: false, webPreferences: { sandbox: true } });
+    await worker.loadFile(tmpHtml);
+    // Wait for asset:// images to finish loading before printing.
+    await worker.webContents.executeJavaScript(
+      'Promise.all(Array.from(document.images, (i) => i.complete ? null : new Promise((r) => { i.onload = i.onerror = r; })))',
+      true
+    );
+    const data = await worker.webContents.printToPDF({
+      printBackground: true,
+      pageSize: 'Letter',
+      margins: { top: 0.6, bottom: 0.6, left: 0.6, right: 0.6 },
+    });
+    fs.writeFileSync(target, data);
+    return { ok: true, path: target };
+  } catch (err) {
+    console.error('pdf export failed:', err);
+    if (win) {
+      dialog.showMessageBox(win, {
+        type: 'error',
+        message: 'Could not export PDF',
+        detail: String((err && err.message) || err),
+      });
+    }
+    return { ok: false, error: String((err && err.message) || err) };
+  } finally {
+    if (worker && !worker.isDestroyed()) worker.destroy();
+    try { fs.unlinkSync(tmpHtml); } catch {}
+  }
+});
 ipcMain.handle('image:baseDir', (_event, tab) => baseDirFor(tab));
 
 // ---- IPC: file save + dialogs ----
@@ -488,6 +537,7 @@ function buildMenu() {
         { type: 'separator' },
         { label: 'Save', accelerator: 'CmdOrCtrl+S', click: () => sendToFocused('menu:save') },
         { label: 'Save As…', accelerator: 'CmdOrCtrl+Shift+S', click: () => sendToFocused('menu:saveAs') },
+        { label: 'Export as PDF…', accelerator: 'CmdOrCtrl+Alt+P', click: () => sendToFocused('menu:exportPdf') },
         { type: 'separator' },
         { label: 'Close Tab', accelerator: 'CmdOrCtrl+W', click: () => sendToFocused('menu:closeTab') },
         { label: 'Close Window', accelerator: 'CmdOrCtrl+Shift+W', role: 'close' },

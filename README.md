@@ -57,6 +57,7 @@ left off.
 | ☑️ **Live checkboxes** | `- [ ]` task lists render as real checkboxes — tick one in the preview and it's checked off in the note itself. `⌘⇧X` turns any line into one. |
 | 🖼 **Drag & drop images** | Drop or paste an image into the editor — it's copied into a sidecar assets folder next to your note and inserted as plain Markdown. |
 | 🔎 **Find & Replace** | `⌘F` / `⌘⌥F` powered by CodeMirror's search. |
+| 📄 **Export as PDF** | `⌘⌥P` renders the note — images, checkboxes, tables and all — into a clean print-styled PDF. |
 | 🔠 **Toolbar & shortcuts** | Bold, italic, code, links, images, headings, lists, checkboxes & blockquotes — one click on the toolbar or one keystroke away. |
 | 📊 **Live status bar** | Line/column, selection length, word count & character count. |
 
@@ -131,6 +132,7 @@ close), so they survive quits without a save.
 | Blockquote | `⌘⇧.` | | Image | `⌘⇧I` |
 | Table | `⌘⇧T` | | Checkbox | `⌘⇧X` |
 | Close Tab | `⌘W` | | Go to Tab 1–9 | `⌘1`–`⌘9` (`⌘9` = last) |
+| Export as PDF | `⌘⌥P` | | | |
 
 ## 🧱 How it's built
 
@@ -153,7 +155,8 @@ close), so they survive quits without a save.
 - [x] **Checkboxes** — live task lists you can tick right in the preview
 - [x] **Images** — drag & drop / paste, stored in a sidecar assets folder
 - [ ] Optional custom notebook location (iCloud/Dropbox sync)
-- [ ] Export to HTML / PDF
+- [x] **Export to PDF** — print-quality export of the rendered note
+- [ ] Export to HTML
 
 ## 📄 License
 
