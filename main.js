@@ -443,9 +443,10 @@ function sendOpenFiles(paths) {
   win.focus();
 }
 
-function promptOpen() {
+function promptOpen(defaultPath) {
   const result = dialog.showOpenDialogSync(mainWindow || undefined, {
     properties: ['openFile', 'multiSelections'],
+    defaultPath,
     filters: [
       { name: 'Markdown', extensions: ['md', 'markdown', 'mdown', 'mkd', 'text', 'txt'] },
       { name: 'All Files', extensions: ['*'] },
@@ -453,6 +454,20 @@ function promptOpen() {
   });
   if (result) sendOpenFiles(result);
 }
+
+function promptOpenObsidian() {
+  const obsidianDir = path.join(
+    app.getPath('home'),
+    'Library', 'Mobile Documents', 'iCloud~md~obsidian', 'Documents',
+  );
+  promptOpen(obsidianDir);
+}
+
+const OBSIDIAN_DIR = path.join(
+  app.getPath('home'),
+  'Library', 'Mobile Documents', 'iCloud~md~obsidian', 'Documents',
+);
+const hasObsidianVault = fs.existsSync(OBSIDIAN_DIR);
 
 app.on('open-file', (event, filePath) => {
   event.preventDefault();
@@ -663,6 +678,9 @@ function buildMenu() {
       submenu: [
         { label: 'New Tab', accelerator: 'CmdOrCtrl+T', click: () => withWindow((w) => w.webContents.send('menu:newTab')) },
         { label: 'Open…', accelerator: 'CmdOrCtrl+O', click: () => promptOpen() },
+        ...(hasObsidianVault
+          ? [{ label: 'Open from Obsidian…', click: () => promptOpenObsidian() }]
+          : []),
         {
           role: 'recentDocuments',
           submenu: [{ label: 'Clear Menu', role: 'clearRecentDocuments' }],
