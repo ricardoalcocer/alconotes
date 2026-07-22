@@ -55,6 +55,7 @@ left off.
 | 🌗 **Native & theme-aware** | Hidden-inset title bar, system fonts, and light/dark that follows macOS — or force it in **View → Appearance** (remembered across launches). |
 | 💾 **Save only if you want** | `⌘S` on a notebook tab saves it to disk — the tab simply becomes that file. `⌘O` opens existing files in tabs. |
 | ☑️ **Live checkboxes** | `- [ ]` task lists render as real checkboxes — tick one in the preview and it's checked off in the note itself. `⌘⇧X` turns any line into one. |
+| 🖍 **Highlights** | Bear-style `==highlighted text==` renders as a real highlight — in the preview and in exported PDFs. `⌘⇧H` wraps the selection. |
 | 🖼 **Drag & drop images** | Drop or paste an image into the editor — it's copied into a sidecar assets folder next to your note and inserted as plain Markdown. |
 | 📂 **Opens from Finder** | Registered as a Markdown editor — right-click a `.md` file → **Open With → Buffer**, or make it the default (Get Info → Change All…). |
 | 🚥 **Lives in your menu bar** | Closing the window doesn't kill your flow — Buffer keeps running with a menu bar icon. One click summons the notebook right back. |
@@ -121,6 +122,7 @@ close), so they survive quits without a save.
 | Bulleted list | `⌘⇧8` | | Numbered list | `⌘⇧7` |
 | Blockquote | `⌘⇧.` | | Image | `⌘⇧I` |
 | Table | `⌘⇧T` | | Checkbox | `⌘⇧X` |
+| Highlight | `⌘⇧H` | | | |
 | Close Tab | `⌘W` | | Go to Tab 1–9 | `⌘1`–`⌘9` (`⌘9` = last) |
 | Export as PDF | `⌘⌥P` | | Always on Top | `⌘⌥T` |
 
@@ -150,6 +152,7 @@ close), so they survive quits without a save.
 - [x] **Menu bar icon** — Buffer stays running with the window closed; one click brings it back
 - [x] **Window memory** — reopens at the position and size you left it
 - [x] **Always on Top** — pin the notebook above every other window
+- [x] **Highlights** — `==text==` Bear-style highlight markup
 - [ ] Optional custom notebook location (iCloud/Dropbox sync)
 - [ ] Export to HTML
 

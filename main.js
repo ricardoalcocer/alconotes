@@ -723,6 +723,7 @@ function buildMenu() {
         { label: 'Bold', accelerator: 'CmdOrCtrl+B', click: () => sendToFocused('menu:format', 'bold') },
         { label: 'Italic', accelerator: 'CmdOrCtrl+I', click: () => sendToFocused('menu:format', 'italic') },
         { label: 'Inline Code', accelerator: 'CmdOrCtrl+K', click: () => sendToFocused('menu:format', 'code') },
+        { label: 'Highlight', accelerator: 'CmdOrCtrl+Shift+H', click: () => sendToFocused('menu:format', 'mark') },
         { label: 'Link', accelerator: 'CmdOrCtrl+Shift+K', click: () => sendToFocused('menu:format', 'link') },
         { label: 'Image', accelerator: 'CmdOrCtrl+Shift+I', click: () => sendToFocused('menu:format', 'image') },
         { label: 'Table…', accelerator: 'CmdOrCtrl+Shift+T', click: () => sendToFocused('menu:format', 'table') },

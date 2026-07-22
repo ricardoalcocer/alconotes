@@ -17,6 +17,7 @@ import {
   search, searchKeymap, openSearchPanel, highlightSelectionMatches,
 } from '@codemirror/search';
 import MarkdownIt from 'markdown-it';
+import markdownItMark from 'markdown-it-mark';
 
 // ---------------------------------------------------------------------------
 // Markdown -> HTML preview renderer
@@ -27,6 +28,8 @@ const md = new MarkdownIt({
   typographer: true,
   breaks: false,
 });
+// ==text== renders as a Bear-style <mark> highlight.
+md.use(markdownItMark);
 
 // GFM task lists: render `- [ ]` / `- [x]` items as real checkboxes. Each one
 // carries its source line so clicking it in the preview can check it off in
@@ -655,6 +658,7 @@ th { background: #f6f8fa; }
 ul, ol { padding-left: 1.8em; }
 li.task-item { list-style-type: none; }
 input.task-check { width: 13px; height: 13px; margin: 0 0.45em 0.15em -1.5em; vertical-align: middle; }
+mark { background: #fff2a8; color: inherit; padding: 0.05em 0.15em; border-radius: 3px; }
 `;
 
 function exportPdf() {
@@ -995,6 +999,7 @@ function applyFormat(kind) {
     case 'bold': return wrapSelection('**');
     case 'italic': return wrapSelection('*');
     case 'code': return wrapSelection('`');
+    case 'mark': return wrapSelection('==');
     case 'link': return insertLink();
     case 'image': return insertImage();
     case 'table': return toggleTablePicker();
