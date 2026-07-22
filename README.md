@@ -16,6 +16,7 @@ A fast, native-feeling macOS Markdown editor in the spirit of
 ![macOS](https://img.shields.io/badge/macOS-Apple_Silicon-000000?style=for-the-badge&logo=apple&logoColor=white)
 ![Electron](https://img.shields.io/badge/Electron-31-47848F?style=for-the-badge&logo=electron&logoColor=white)
 ![CodeMirror 6](https://img.shields.io/badge/CodeMirror-6-d30707?style=for-the-badge&logo=codemirror&logoColor=white)
+![Version](https://img.shields.io/github/package-json/v/ricardoalcocer/alconotes?style=for-the-badge&label=Version&color=8b5cf6)
 ![License](https://img.shields.io/badge/License-MIT-3fb950?style=for-the-badge)
 
 ![Last commit](https://img.shields.io/github/last-commit/ricardoalcocer/alconotes?color=8b5cf6)
@@ -152,6 +153,12 @@ close), so they survive quits without a save.
 - [x] **Always on Top** — pin the notebook above every other window
 - [ ] Optional custom notebook location (iCloud/Dropbox sync)
 - [ ] Export to HTML
+
+## 🔢 Versioning
+
+Buffer follows [semver](https://semver.org). Every PR bumps the version in `package.json`
+and adds a [CHANGELOG](CHANGELOG.md) entry — minor for features, patch for fixes. The
+running version is always in **Buffer → About Buffer**.
 
 ## 📄 License
 
