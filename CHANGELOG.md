@@ -4,35 +4,73 @@ All notable changes to Buffer are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com); versions follow [semver](https://semver.org).
 Every PR bumps the version and adds an entry — minor for features, patch for fixes.
 
-## [1.0.0] — 2026-07-22 — the roadtrip release 🏜️
+> Versions 0.2.0–0.17.1 were reconstructed retroactively from the merge history
+> when versioning discipline was introduced in 0.18.0 (#23): each feature PR
+> counted as a minor bump, each fix as a patch, dated by its actual merge.
 
-Everything below shipped across a roadtrip through Park City, Bryce Canyon,
-Lone Rock and Mesa Verde.
+## [0.18.0] — 2026-07-22
+- **Versioning** — this changelog, semver discipline, real version in the About
+  panel, live version badge in the README, conventions recorded in CLAUDE.md (#23)
 
-### Added
-- **Tabs** — perpetual notebook tabs + real file tabs, session restored on relaunch (#2)
-- **Appearance** — light/dark/system toggle, persisted (#3)
-- **⌘-click links** in the editor open in the browser (#4)
-- **Renamed to Buffer** — was AlcoNotes (#5)
-- **Images** — drag & drop / paste, stored in a sidecar assets folder (#6)
-- **Checkboxes** — GFM task lists, tickable right in the preview (#7)
-- **⌘1–⌘9 tab switching**, browser-style, with ⌘digit hints on the tabs (#8, #9, #10)
-- **Open With / Finder integration** — registered as a macOS Markdown editor (#11)
-- **Automatic backups** — hourly + at-launch snapshots; closed notebooks go to trash instead of being deleted (#12)
-- **Export as PDF** (⌘⌥P) — print-styled, images/checkboxes/tables included (#13)
-- **Menu bar icon** — Buffer keeps running with the window closed; one click summons it; the icon mirrors the app's M↓ mark (#16, #17)
-- **Window memory** — reopens at the position and size you left it (#18)
-- **Always on Top** (Window menu, ⌘⌥T), persisted (#19)
-- **Open from Obsidian…** menu item (#20)
+## [0.17.1] — 2026-07-22
+- Fixed: macOS "contains malware" false positive on unsigned builds — the packaged
+  app is now ad-hoc signed by `npm run dist` (#22)
+- Fixed: accidentally committed 66k-line renderer bundle removed from the repo root (#22)
+
+## [0.17.0] — 2026-07-22
 - **Highlights** — Bear-style `==text==` markup (⌘⇧H), theme-aware, in preview and PDF (#21)
-- **Versioning** — this changelog, semver discipline, live version in the About panel and README badge (#23)
 
-### Fixed
-- Empty task items (`- [ ] `) render as checkboxes; checkboxes follow dark mode (post-#7)
-- macOS "contains malware" false positive on unsigned builds — packaged app is now ad-hoc signed by `npm run dist` (#22)
-- Accidentally committed 66k-line renderer bundle removed from the repo root (#22)
+## [0.16.0] — 2026-07-16
+- **Open from Obsidian…** menu item (#20)
+
+## [0.15.0] — 2026-07-14
+- **Always on Top** (Window menu, ⌘⌥T), persisted (#19)
+
+## [0.14.0] — 2026-07-14
+- **Window memory** — reopens at the position and size you left it (#18)
+
+## [0.13.1] — 2026-07-14
+- Tray icon now mirrors the app icon's M↓ mark (#17)
+
+## [0.13.0] — 2026-07-14
+- **Menu bar icon** — Buffer keeps running with the window closed; one click
+  summons the notebook back (#16)
+
+## [0.12.0] — 2026-07-14
+- **Export as PDF** (⌘⌥P) — print-styled, images/checkboxes/tables included (#13)
+
+## [0.11.0] — 2026-07-14
+- **Automatic backups** — hourly + at-launch snapshots; closed notebooks go to
+  trash instead of being deleted (#12)
+
+## [0.10.0] — 2026-07-14
+- **Open With / Finder integration** — registered as a macOS Markdown editor (#11)
+
+## [0.9.0] — 2026-07-13
+- **⌘digit hints** shown on tabs (#10)
+
+## [0.8.0] — 2026-07-13
+- **⌘1–⌘9 tab switching**, browser-style; headings moved to ⌘⌥1/2/3 (#8, #9)
+
+## [0.7.0] — 2026-07-13
+- **Checkboxes** — GFM task lists, tickable right in the preview (#7)
+- Fixed: empty task items (`- [ ] `) render as checkboxes; checkboxes follow dark mode
+
+## [0.6.0] — 2026-07-13
+- **Images** — drag & drop / paste, stored in a sidecar assets folder (#6)
+
+## [0.5.0] — 2026-07-09
+- **Renamed to Buffer** — was AlcoNotes (#5)
+
+## [0.4.0] — 2026-07-09
+- **⌘-click links** in the editor open in the browser (#4)
+
+## [0.3.0] — 2026-07-09
+- **Appearance** — light/dark/system toggle, persisted (#3)
+
+## [0.2.0] — 2026-07-09
+- **Tabs** — perpetual notebook tabs + real file tabs, session restored on relaunch (#2)
 
 ## [0.1.0] — 2026-07-09
-
-- Initial AlcoNotes: a single perpetual auto-saved scratch note, CodeMirror 6 editor,
-  optional live preview, native menus, packaged `.app`/`.dmg` (#1)
+- Initial AlcoNotes: a single perpetual auto-saved scratch note, CodeMirror 6
+  editor, optional live preview, native menus, packaged `.app`/`.dmg` (#1)
