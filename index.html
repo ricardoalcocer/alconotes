@@ -12,6 +12,10 @@
       <div id="titlebar-drag"></div>
       <nav id="tabbar"></nav>
       <div id="toolbar">
+        <button type="button" id="tb-outline" title="Toggle Outline (⌘⇧O)" aria-pressed="false">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M2 3h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm.5 1.5v7h3.4v-7H2.5Zm4.4 0v7h6.6v-7H6.9Z"/></svg>
+        </button>
+        <span class="tb-sep"></span>
         <button type="button" data-format="h1" title="Heading 1 (⌘⌥1)">H1</button>
         <button type="button" data-format="h2" title="Heading 2 (⌘⌥2)">H2</button>
         <button type="button" data-format="h3" title="Heading 3 (⌘⌥3)">H3</button>
@@ -49,6 +53,11 @@
         </button>
       </div>
       <main id="workspace" class="view-split">
+        <aside id="outline-pane" hidden>
+          <div id="outline-title">Outline</div>
+          <div id="outline"></div>
+        </aside>
+        <div id="outline-resizer" hidden></div>
         <section id="editor-pane">
           <div id="editor"></div>
         </section>

@@ -8,6 +8,11 @@ Every PR bumps the version and adds an entry — minor for features, patch for f
 > when versioning discipline was introduced in 0.18.0 (#23): each feature PR
 > counted as a minor bump, each fix as a patch, dated by its actual merge.
 
+## [0.19.0] — 2026-07-22
+- **Outline sidebar** (⌘⇧O, or the toolbar's sidebar button) — the note's heading
+  structure at a glance: click to jump, cursor section tracked live, resizable,
+  width remembered (#24)
+
 ## [0.18.0] — 2026-07-22
 - **Versioning** — this changelog, semver discipline, real version in the About
   panel, live version badge in the README, conventions recorded in CLAUDE.md (#23)
