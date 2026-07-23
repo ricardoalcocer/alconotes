@@ -16,6 +16,7 @@ A fast, native-feeling macOS Markdown editor in the spirit of
 ![macOS](https://img.shields.io/badge/macOS-Apple_Silicon-000000?style=for-the-badge&logo=apple&logoColor=white)
 ![Electron](https://img.shields.io/badge/Electron-31-47848F?style=for-the-badge&logo=electron&logoColor=white)
 ![CodeMirror 6](https://img.shields.io/badge/CodeMirror-6-d30707?style=for-the-badge&logo=codemirror&logoColor=white)
+![Version](https://img.shields.io/github/package-json/v/ricardoalcocer/alconotes?style=for-the-badge&label=Version&color=8b5cf6)
 ![License](https://img.shields.io/badge/License-MIT-3fb950?style=for-the-badge)
 
 ![Last commit](https://img.shields.io/github/last-commit/ricardoalcocer/alconotes?color=8b5cf6)
@@ -56,6 +57,7 @@ left off.
 | 🌗 **Native & theme-aware** | Hidden-inset title bar, system fonts, and light/dark that follows macOS — or force it in **View → Appearance** (remembered across launches). |
 | 💾 **Save only if you want** | `⌘S` on a notebook tab saves it to disk — the tab simply becomes that file. `⌘O` opens existing files in tabs. |
 | ☑️ **Live checkboxes** | `- [ ]` task lists render as real checkboxes — tick one in the preview and it's checked off in the note itself. `⌘⇧X` turns any line into one. |
+| 🖍 **Highlights** | Bear-style `==highlighted text==` renders as a real highlight — in the preview and in exported PDFs. `⌘⇧H` wraps the selection. |
 | 🖼 **Drag & drop images** | Drop or paste an image into the editor — it's copied into a sidecar assets folder next to your note and inserted as plain Markdown. |
 | 📂 **Opens from Finder** | Registered as a Markdown editor — right-click a `.md` file → **Open With → Buffer**, or make it the default (Get Info → Change All…). |
 | 🚥 **Lives in your menu bar** | Closing the window doesn't kill your flow — Buffer keeps running with a menu bar icon. One click summons the notebook right back. |
@@ -122,6 +124,7 @@ close), so they survive quits without a save.
 | Bulleted list | `⌘⇧8` | | Numbered list | `⌘⇧7` |
 | Blockquote | `⌘⇧.` | | Image | `⌘⇧I` |
 | Table | `⌘⇧T` | | Checkbox | `⌘⇧X` |
+| Highlight | `⌘⇧H` | | | |
 | Close Tab | `⌘W` | | Go to Tab 1–9 | `⌘1`–`⌘9` (`⌘9` = last) |
 | Export as PDF | `⌘⌥P` | | Always on Top | `⌘⌥T` |
 | Toggle Outline | `⌘⇧O` | | | |
@@ -152,9 +155,16 @@ close), so they survive quits without a save.
 - [x] **Menu bar icon** — Buffer stays running with the window closed; one click brings it back
 - [x] **Window memory** — reopens at the position and size you left it
 - [x] **Always on Top** — pin the notebook above every other window
+- [x] **Highlights** — `==text==` Bear-style highlight markup
 - [x] **Outline sidebar** — heading structure at a glance, click to jump
 - [ ] Optional custom notebook location (iCloud/Dropbox sync)
 - [ ] Export to HTML
+
+## 🔢 Versioning
+
+Buffer follows [semver](https://semver.org). Every PR bumps the version in `package.json`
+and adds a [CHANGELOG](CHANGELOG.md) entry — minor for features, patch for fixes. The
+running version is always in **Buffer → About Buffer**.
 
 ## 📄 License
 
