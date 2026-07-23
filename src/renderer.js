@@ -34,6 +34,13 @@ md.use(markdownItMark);
 // GFM task lists: render `- [ ]` / `- [x]` items as real checkboxes. Each one
 // carries its source line so clicking it in the preview can check it off in
 // the note itself.
+// Headings carry their source line so the outline can scroll the preview.
+md.core.ruler.push('heading_lines', (state) => {
+  for (const tok of state.tokens) {
+    if (tok.type === 'heading_open' && tok.map) tok.attrSet('data-line', String(tok.map[0]));
+  }
+});
+
 md.core.ruler.push('task_lists', (state) => {
   const toks = state.tokens;
   for (let i = 2; i < toks.length; i++) {
@@ -680,6 +687,13 @@ function renderOutline() {
         selection: { anchor: line.from },
         effects: EditorView.scrollIntoView(line.from, { y: 'start', yMargin: 8 }),
       });
+      // The editor is hidden in preview-only mode (and the preview doesn't
+      // follow the editor in split) — scroll the rendered heading too.
+      const target = previewEl.querySelector(
+        `:is(h1,h2,h3,h4,h5,h6)[data-line="${it.line - 1}"]`);
+      if (target && !workspace.classList.contains('view-editor')) {
+        target.scrollIntoView({ block: 'start' });
+      }
       view.focus();
     });
     outlineEl.append(el);

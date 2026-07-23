@@ -12,6 +12,8 @@ Every PR bumps the version and adds an entry — minor for features, patch for f
 - Fixed: the status bar Preview button forgot your preferred layout on relaunch —
   it always opened a split until ⌘⇧E/⌘⇧R had been used once. The split vs
   preview-only choice is now remembered across launches (#26)
+- Fixed: outline clicks now scroll the preview too — in preview-only mode they
+  previously only moved the hidden editor, so nothing visibly happened (#26)
 
 ## [0.19.0] — 2026-07-22
 - **Outline sidebar** (⌘⇧O, or the toolbar's sidebar button) — the note's heading
