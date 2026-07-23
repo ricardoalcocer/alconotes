@@ -52,7 +52,7 @@ left off.
 | 🗂 **Tabs** | Mix perpetual notebook tabs with real files from disk in one window — the whole layout, window size and position included, is restored on relaunch. |
 | ✍️ **Real Markdown editor** | CodeMirror 6 with live syntax highlighting, line numbers, active-line highlight, bracket matching & soft wrap. `⌘`-click any link to open it in your browser. |
 | 👀 **Optional live preview** | A one-click toggle (or `⌘⇧P`) for a rendered side-by-side preview. Off by default — it's there when you want it. Task-list checkboxes are live — tick one in the preview and it's checked off in the note. |
-| 🧭 **Outline sidebar** | `⌘⇧O` opens a left sidebar with the note's heading structure — click a heading to jump there. Live as you type, cursor position tracked. |
+| 🧭 **Outline sidebar** | `⌘⇧O` (or the toolbar's sidebar button) opens a left pane with the note's heading structure — click a heading to jump there. Live as you type, cursor tracked, drag the edge to resize. |
 | 🌗 **Native & theme-aware** | Hidden-inset title bar, system fonts, and light/dark that follows macOS — or force it in **View → Appearance** (remembered across launches). |
 | 💾 **Save only if you want** | `⌘S` on a notebook tab saves it to disk — the tab simply becomes that file. `⌘O` opens existing files in tabs. |
 | ☑️ **Live checkboxes** | `- [ ]` task lists render as real checkboxes — tick one in the preview and it's checked off in the note itself. `⌘⇧X` turns any line into one. |

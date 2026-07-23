@@ -696,11 +696,47 @@ function updateOutlineActive() {
   if (hit) hit.classList.add('active');
 }
 
+const outlineBtn = document.getElementById('tb-outline');
+const outlineResizer = document.getElementById('outline-resizer');
+
 function toggleOutline() {
   showOutline = !showOutline;
   outlinePane.hidden = !showOutline;
+  outlineResizer.hidden = !showOutline;
+  if (outlineBtn) outlineBtn.setAttribute('aria-pressed', String(showOutline));
   if (showOutline) renderOutline();
 }
+if (outlineBtn) outlineBtn.addEventListener('click', () => toggleOutline());
+
+// Drag the resizer to size the pane; width is clamped and remembered.
+const OUTLINE_MIN = 140;
+const OUTLINE_MAX = 420;
+
+function setOutlineWidth(w) {
+  const width = Math.min(OUTLINE_MAX, Math.max(OUTLINE_MIN, Math.round(w)));
+  outlinePane.style.setProperty('--outline-width', `${width}px`);
+  return width;
+}
+{
+  const saved = Number(localStorage.getItem('outlineWidth'));
+  if (saved) setOutlineWidth(saved);
+}
+outlineResizer.addEventListener('mousedown', (e) => {
+  e.preventDefault();
+  const startX = e.clientX;
+  const startW = outlinePane.getBoundingClientRect().width;
+  let width = startW;
+  document.body.classList.add('outline-resizing');
+  const onMove = (ev) => { width = setOutlineWidth(startW + ev.clientX - startX); };
+  const onUp = () => {
+    window.removeEventListener('mousemove', onMove);
+    window.removeEventListener('mouseup', onUp);
+    document.body.classList.remove('outline-resizing');
+    localStorage.setItem('outlineWidth', String(width));
+  };
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+});
 
 // ---- Export as PDF ----------------------------------------------------------
 // The note is re-rendered standalone (same markdown-it pipeline as the

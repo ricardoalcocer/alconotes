@@ -213,7 +213,7 @@ html, body {
 #editor-pane { flex: 1 1 50%; }
 
 #outline-pane {
-  flex: 0 0 192px;
+  flex: 0 0 var(--outline-width, 192px);
   overflow-y: auto;
   border-right: 1px solid var(--border);
   background: var(--preview-bg);
@@ -248,6 +248,19 @@ html, body {
 .outline-item[data-level="5"] { padding-left: 56px; }
 .outline-item[data-level="6"] { padding-left: 68px; }
 .outline-empty { color: var(--muted); padding: 4px 8px; }
+
+#outline-resizer {
+  flex: 0 0 5px;
+  margin: 0 -2px 0 -3px;
+  cursor: col-resize;
+  z-index: 5;
+}
+#outline-resizer:hover, body.outline-resizing #outline-resizer { background: var(--accent); opacity: 0.35; }
+body.outline-resizing { cursor: col-resize; user-select: none; }
+#tb-outline[aria-pressed="true"] {
+  color: #fff;
+  background: var(--accent);
+}
 #preview-pane { flex: 1 1 50%; background: var(--preview-bg); border-left: 1px solid var(--border); }
 
 #divider {
