@@ -8,6 +8,20 @@ Every PR bumps the version and adds an entry — minor for features, patch for f
 > when versioning discipline was introduced in 0.18.0 (#23): each feature PR
 > counted as a minor bump, each fix as a patch, dated by its actual merge.
 
+## [0.20.0] — 2026-07-23
+- **Menu bar icon toggles the window** — click hides Buffer if it's showing,
+  summons it if not (#26)
+- **Split-view scroll sync** — the editor and preview follow each other while
+  scrolling, mapped through source lines (#26)
+- **Split View menu item** (⌘⇧D, toggles back to editor) — split was previously
+  only reachable via the Preview toggle's default; the View menu now checkmarks
+  the active mode (#26)
+- Fixed: the status bar Preview button forgot your preferred layout on relaunch —
+  it always opened a split until ⌘⇧E/⌘⇧R had been used once. The split vs
+  preview-only choice is now remembered across launches (#26)
+- Fixed: outline clicks now scroll the preview too — in preview-only mode they
+  previously only moved the hidden editor, so nothing visibly happened (#26)
+
 ## [0.19.0] — 2026-07-22
 - **Outline sidebar** (⌘⇧O, or the toolbar's sidebar button) — the note's heading
   structure at a glance: click to jump, cursor section tracked live, resizable,

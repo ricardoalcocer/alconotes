@@ -405,6 +405,16 @@ function showWindow() {
   }
 }
 
+// Tray click toggles the window: hide it if it's showing, summon it if not
+// (recreating from the saved session if it was closed).
+function toggleWindow() {
+  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible()) {
+    mainWindow.hide();
+  } else {
+    showWindow();
+  }
+}
+
 function createTray() {
   tray = new Tray(path.join(__dirname, 'assets', 'trayTemplate.png'));
   tray.setToolTip('Buffer');
@@ -417,7 +427,7 @@ function createTray() {
     { type: 'separator' },
     { label: 'Quit Buffer', role: 'quit' },
   ]);
-  tray.on('click', () => showWindow());
+  tray.on('click', () => toggleWindow());
   tray.on('right-click', () => tray.popUpContextMenu(menu));
 }
 
@@ -637,6 +647,9 @@ ipcMain.on('doc:state', (event, payload) => {
   win.setDocumentEdited(dirtyFiles.length > 0);
   win.setRepresentedFilename(typeof payload.filePath === 'string' ? payload.filePath : '');
   win.setTitle(String(payload.title || 'Buffer'));
+  const menu = Menu.getApplicationMenu();
+  const modeItem = menu && menu.getMenuItemById(`view-${payload.viewMode}`);
+  if (modeItem) modeItem.checked = true;
 });
 
 // Renderer asks main to finish closing (after save-all triggered by close).
@@ -743,8 +756,9 @@ function buildMenu() {
       submenu: [
         { label: 'Toggle Outline', accelerator: 'CmdOrCtrl+Shift+O', click: () => sendToFocused('menu:toggleOutline') },
         { label: 'Toggle Preview', accelerator: 'CmdOrCtrl+Shift+P', click: () => sendToFocused('menu:togglePreview') },
-        { label: 'Editor Only', accelerator: 'CmdOrCtrl+Shift+E', click: () => sendToFocused('menu:viewMode', 'editor') },
-        { label: 'Preview Only', accelerator: 'CmdOrCtrl+Shift+R', click: () => sendToFocused('menu:viewMode', 'preview') },
+        { id: 'view-editor', label: 'Editor Only', type: 'radio', checked: true, accelerator: 'CmdOrCtrl+Shift+E', click: () => sendToFocused('menu:viewMode', 'editor') },
+        { id: 'view-split', label: 'Split View', type: 'radio', accelerator: 'CmdOrCtrl+Shift+D', click: () => sendToFocused('menu:viewMode', 'split') },
+        { id: 'view-preview', label: 'Preview Only', type: 'radio', accelerator: 'CmdOrCtrl+Shift+R', click: () => sendToFocused('menu:viewMode', 'preview') },
         { type: 'separator' },
         {
           label: 'Appearance',

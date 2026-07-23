@@ -52,7 +52,7 @@ left off.
 | 📓 **Perpetual notebook** | Launches straight into your always-there note. Auto-saved continuously — never marked "unsaved", never nags you on quit. |
 | 🗂 **Tabs** | Mix perpetual notebook tabs with real files from disk in one window — the whole layout, window size and position included, is restored on relaunch. |
 | ✍️ **Real Markdown editor** | CodeMirror 6 with live syntax highlighting, line numbers, active-line highlight, bracket matching & soft wrap. `⌘`-click any link to open it in your browser. |
-| 👀 **Optional live preview** | A one-click toggle (or `⌘⇧P`) for a rendered side-by-side preview. Off by default — it's there when you want it. Task-list checkboxes are live — tick one in the preview and it's checked off in the note. |
+| 👀 **Optional live preview** | A one-click toggle (or `⌘⇧P`) for a rendered side-by-side preview — scroll-synced both ways in split view. Off by default — it's there when you want it. Task-list checkboxes are live — tick one in the preview and it's checked off in the note. |
 | 🧭 **Outline sidebar** | `⌘⇧O` (or the toolbar's sidebar button) opens a left pane with the note's heading structure — click a heading to jump there. Live as you type, cursor tracked, drag the edge to resize. |
 | 🌗 **Native & theme-aware** | Hidden-inset title bar, system fonts, and light/dark that follows macOS — or force it in **View → Appearance** (remembered across launches). |
 | 💾 **Save only if you want** | `⌘S` on a notebook tab saves it to disk — the tab simply becomes that file. `⌘O` opens existing files in tabs. |
@@ -60,7 +60,7 @@ left off.
 | 🖍 **Highlights** | Bear-style `==highlighted text==` renders as a real highlight — in the preview and in exported PDFs. `⌘⇧H` wraps the selection. |
 | 🖼 **Drag & drop images** | Drop or paste an image into the editor — it's copied into a sidecar assets folder next to your note and inserted as plain Markdown. |
 | 📂 **Opens from Finder** | Registered as a Markdown editor — right-click a `.md` file → **Open With → Buffer**, or make it the default (Get Info → Change All…). |
-| 🚥 **Lives in your menu bar** | Closing the window doesn't kill your flow — Buffer keeps running with a menu bar icon. One click summons the notebook right back. |
+| 🚥 **Lives in your menu bar** | Closing the window doesn't kill your flow — Buffer keeps running with a menu bar icon. Click toggles the notebook: summon it from anywhere, click again to tuck it away. |
 | 📌 **Always on Top** | Pin the notebook over every other window — **Window → Always on Top** (`⌘⌥T`), remembered across launches. |
 | 🛟 **Automatic backups** | Notebooks are snapshotted hourly (and at every launch), and closing a notebook tab moves it to a trash folder instead of deleting it. **File → Open Backups Folder** takes you there. |
 | 🔎 **Find & Replace** | `⌘F` / `⌘⌥F` powered by CodeMirror's search. |
@@ -124,7 +124,7 @@ close), so they survive quits without a save.
 | Bulleted list | `⌘⇧8` | | Numbered list | `⌘⇧7` |
 | Blockquote | `⌘⇧.` | | Image | `⌘⇧I` |
 | Table | `⌘⇧T` | | Checkbox | `⌘⇧X` |
-| Highlight | `⌘⇧H` | | | |
+| Highlight | `⌘⇧H` | | Split View | `⌘⇧D` |
 | Close Tab | `⌘W` | | Go to Tab 1–9 | `⌘1`–`⌘9` (`⌘9` = last) |
 | Export as PDF | `⌘⌥P` | | Always on Top | `⌘⌥T` |
 | Toggle Outline | `⌘⇧O` | | | |

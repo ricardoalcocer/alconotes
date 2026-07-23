@@ -34,6 +34,19 @@ md.use(markdownItMark);
 // GFM task lists: render `- [ ]` / `- [x]` items as real checkboxes. Each one
 // carries its source line so clicking it in the preview can check it off in
 // the note itself.
+// Block elements carry their source line: the outline uses headings to jump
+// the preview, and split-view scroll sync interpolates between all of them.
+const LINE_STAMPED = new Set([
+  'heading_open', 'paragraph_open', 'list_item_open', 'blockquote_open', 'table_open',
+]);
+md.core.ruler.push('block_lines', (state) => {
+  for (const tok of state.tokens) {
+    if (LINE_STAMPED.has(tok.type) && tok.map && !tok.hidden) {
+      tok.attrSet('data-line', String(tok.map[0]));
+    }
+  }
+});
+
 md.core.ruler.push('task_lists', (state) => {
   const toks = state.tokens;
   for (let i = 2; i < toks.length; i++) {
@@ -627,6 +640,65 @@ function resolveLocalImages(root = previewEl) {
   }
 }
 
+// ---- Split-view scroll sync -------------------------------------------------
+// Two-way: the top of the scrolled pane is mapped to a (fractional) source
+// line, and the other pane scrolls to the interpolated position between its
+// nearest line-stamped anchors. A short-lived lock stops echo loops.
+let scrollSyncLock = null;
+
+function lockScrollSync(which) {
+  scrollSyncLock = which;
+  clearTimeout(lockScrollSync.timer);
+  lockScrollSync.timer = setTimeout(() => { scrollSyncLock = null; }, 140);
+}
+
+// [{line, top}] anchors from the rendered preview, in document order.
+function previewAnchors() {
+  const base = previewEl.getBoundingClientRect().top - previewEl.scrollTop;
+  const list = [{ line: 1, top: 0 }];
+  for (const el of previewEl.querySelectorAll('[data-line]')) {
+    const line = Number(el.dataset.line) + 1;
+    if (line > list[list.length - 1].line) {
+      list.push({ line, top: el.getBoundingClientRect().top - base });
+    }
+  }
+  list.push({ line: view.state.doc.lines + 1, top: previewEl.scrollHeight });
+  return list;
+}
+
+function syncFromEditor() {
+  if (!workspace.classList.contains('view-split')) return;
+  if (scrollSyncLock === 'preview') return;
+  lockScrollSync('editor');
+  const scrollTop = view.scrollDOM.scrollTop;
+  const block = view.lineBlockAtHeight(scrollTop);
+  const lineF = view.state.doc.lineAt(block.from).number
+    + (block.height > 0 ? Math.min(1, Math.max(0, (scrollTop - block.top) / block.height)) : 0);
+  const a = previewAnchors();
+  let i = 0;
+  while (i < a.length - 2 && a[i + 1].line <= lineF) i++;
+  const t = (lineF - a[i].line) / Math.max(1e-6, a[i + 1].line - a[i].line);
+  previewEl.scrollTop = a[i].top + t * (a[i + 1].top - a[i].top);
+}
+
+function syncFromPreview() {
+  if (!workspace.classList.contains('view-split')) return;
+  if (scrollSyncLock === 'editor') return;
+  lockScrollSync('preview');
+  const a = previewAnchors();
+  const y = previewEl.scrollTop;
+  let i = 0;
+  while (i < a.length - 2 && a[i + 1].top <= y) i++;
+  const t = (y - a[i].top) / Math.max(1e-6, a[i + 1].top - a[i].top);
+  const lineF = a[i].line + t * (a[i + 1].line - a[i].line);
+  const line = view.state.doc.line(Math.min(view.state.doc.lines, Math.max(1, Math.floor(lineF))));
+  const block = view.lineBlockAt(line.from);
+  view.scrollDOM.scrollTop = block.top + (lineF - Math.floor(lineF)) * block.height;
+}
+
+view.scrollDOM.addEventListener('scroll', syncFromEditor, { passive: true });
+previewEl.addEventListener('scroll', syncFromPreview, { passive: true });
+
 // ---- Outline sidebar --------------------------------------------------------
 // A left pane listing the note's ATX headings; click to jump. Rebuilt
 // (debounced) as the doc changes; the item containing the cursor is marked.
@@ -680,6 +752,14 @@ function renderOutline() {
         selection: { anchor: line.from },
         effects: EditorView.scrollIntoView(line.from, { y: 'start', yMargin: 8 }),
       });
+      // The editor is hidden in preview-only mode (and the preview doesn't
+      // follow the editor in split) — scroll the rendered heading too.
+      const target = previewEl.querySelector(
+        `:is(h1,h2,h3,h4,h5,h6)[data-line="${it.line - 1}"]`);
+      if (target && !workspace.classList.contains('view-editor')) {
+        lockScrollSync('editor'); // both panes are being placed explicitly
+        target.scrollIntoView({ block: 'start' });
+      }
       view.focus();
     });
     outlineEl.append(el);
@@ -892,6 +972,7 @@ function notifyState() {
       title: tab.name,
       filePath: tab.kind === 'file' ? tab.path : null,
       dirtyFiles,
+      viewMode,
     });
   }
 }
@@ -1137,16 +1218,25 @@ function applyFormat(kind) {
 const workspace = document.getElementById('workspace');
 const previewBtn = document.getElementById('toggle-preview');
 let viewMode = 'editor'; // split | editor | preview
-let lastPreviewMode = 'split'; // remembers split vs preview-only when toggling back on
+// Remembers split vs preview-only when toggling back on — across launches,
+// so the Preview button behaves the same on a fresh launch as it did in the
+// last session.
+let lastPreviewMode = ['split', 'preview'].includes(localStorage.getItem('previewMode'))
+  ? localStorage.getItem('previewMode')
+  : 'split';
 
 function setViewMode(mode) {
   viewMode = mode;
-  if (mode !== 'editor') lastPreviewMode = mode;
+  if (mode !== 'editor') {
+    lastPreviewMode = mode;
+    localStorage.setItem('previewMode', mode);
+  }
   workspace.classList.remove('view-split', 'view-editor', 'view-preview');
   workspace.classList.add(`view-${mode}`);
   const previewVisible = mode !== 'editor';
   if (previewBtn) previewBtn.setAttribute('aria-pressed', String(previewVisible));
   if (previewVisible) renderPreview();
+  notifyState(); // keeps the View menu's mode checkmark current
 }
 
 function togglePreview() {
@@ -1265,7 +1355,8 @@ if (window.api) {
   window.api.on('menu:replace', () => openSearchPanel(view));
   window.api.on('menu:format', (kind) => applyFormat(kind));
   window.api.on('menu:togglePreview', () => togglePreview());
-  window.api.on('menu:viewMode', (mode) => setViewMode(mode));
+  window.api.on('menu:viewMode', (mode) => setViewMode(
+    mode === 'split' && viewMode === 'split' ? 'editor' : mode));
   window.api.on('menu:toggleLineNumbers', () => toggleLineNumbers());
   window.api.on('menu:toggleLineWrap', () => toggleLineWrap());
   window.api.on('menu:exportPdf', () => exportPdf());
