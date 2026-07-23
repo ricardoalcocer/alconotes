@@ -63,7 +63,7 @@ left off.
 | 🔎 **Find & Replace** | `⌘F` / `⌘⌥F` powered by CodeMirror's search. |
 | 📄 **Export as PDF** | `⌘⌥P` renders the note — images, checkboxes, tables and all — into a clean print-styled PDF. |
 | 🔠 **Toolbar & shortcuts** | Bold, italic, code, links, images, headings, lists, checkboxes & blockquotes — one click on the toolbar or one keystroke away. |
-| 📊 **Live status bar** | Line/column, selection length, word count & character count. |
+| 📊 **Live status bar** | Line/column, selection length, word count, character count — and a draggable zoom slider (50–200%, double-click to reset, remembered). |
 
 ## 🛠️ Develop
 

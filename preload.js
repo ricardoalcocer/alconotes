@@ -17,6 +17,7 @@ const incoming = [
   'menu:viewMode',
   'menu:toggleLineNumbers',
   'menu:toggleLineWrap',
+  'menu:zoom',
   'menu:exportPdf',
 ];
 
@@ -25,6 +26,7 @@ contextBridge.exposeInMainWorld('api', {
   sessionSave: (state) => ipcRenderer.send('session:save', state),
   notebookSave: (id, content) => ipcRenderer.send('notebook:save', { id, content }),
   notebookDelete: (id) => ipcRenderer.send('notebook:delete', { id }),
+  zoomSet: (factor) => ipcRenderer.send('zoom:set', factor),
   imageSave: (payload) => ipcRenderer.invoke('image:save', payload),
   imageBaseDir: (tab) => ipcRenderer.invoke('image:baseDir', tab),
   save: (payload) => ipcRenderer.invoke('file:save', payload),

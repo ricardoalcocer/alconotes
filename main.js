@@ -518,6 +518,13 @@ ipcMain.on('session:save', (_event, state) => {
 ipcMain.on('notebook:save', (_event, { id, content }) => writeNotebook(String(id), String(content ?? '')));
 ipcMain.on('notebook:delete', (_event, { id }) => deleteNotebook(String(id)));
 
+// Zoom is owned by the renderer (slider + menu both funnel through it); main
+// just applies the factor to the page.
+ipcMain.on('zoom:set', (event, factor) => {
+  const f = Math.min(2, Math.max(0.5, Number(factor) || 1));
+  event.sender.setZoomFactor(f);
+});
+
 // ---- IPC: sidecar image assets ----
 
 ipcMain.handle('image:save', (_event, { tab, bytes, ext } = {}) => saveImageAsset(tab, bytes, ext));
@@ -756,9 +763,9 @@ function buildMenu() {
         { label: 'Toggle Line Numbers', click: () => sendToFocused('menu:toggleLineNumbers') },
         { label: 'Toggle Line Wrap', click: () => sendToFocused('menu:toggleLineWrap') },
         { type: 'separator' },
-        { role: 'resetZoom' },
-        { role: 'zoomIn' },
-        { role: 'zoomOut' },
+        { label: 'Actual Size', accelerator: 'CmdOrCtrl+0', click: () => sendToFocused('menu:zoom', 'reset') },
+        { label: 'Zoom In', accelerator: 'CmdOrCtrl+Plus', click: () => sendToFocused('menu:zoom', 'in') },
+        { label: 'Zoom Out', accelerator: 'CmdOrCtrl+-', click: () => sendToFocused('menu:zoom', 'out') },
         { type: 'separator' },
         { role: 'togglefullscreen' },
         { role: 'toggleDevTools' },

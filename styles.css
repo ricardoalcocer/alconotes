@@ -280,6 +280,21 @@ html, body {
   border-radius: 5px;
   cursor: default;
 }
+#zoom-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#zoom-slider {
+  width: 88px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+#zoom-label {
+  min-width: 36px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
 #toggle-preview:hover { background: rgba(135,131,120,0.15); }
 #toggle-preview svg { display: block; }
 #toggle-preview[aria-pressed="true"] {

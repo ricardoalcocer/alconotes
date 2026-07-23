@@ -1122,6 +1122,29 @@ function toggleLineWrap() {
 }
 
 // ---------------------------------------------------------------------------
+// Zoom — a status bar slider; the View menu items funnel through the same
+// path, so slider, label, and page always agree. Remembered across launches.
+// ---------------------------------------------------------------------------
+const zoomSlider = document.getElementById('zoom-slider');
+const zoomLabel = document.getElementById('zoom-label');
+let zoomFactor = 1;
+
+function applyZoom(f) {
+  zoomFactor = Math.min(2, Math.max(0.5, Math.round(f * 20) / 20));
+  if (window.api && window.api.zoomSet) window.api.zoomSet(zoomFactor);
+  zoomSlider.value = String(Math.round(zoomFactor * 100));
+  zoomLabel.textContent = `${Math.round(zoomFactor * 100)}%`;
+  localStorage.setItem('zoomFactor', String(zoomFactor));
+}
+
+zoomSlider.addEventListener('input', () => applyZoom(Number(zoomSlider.value) / 100));
+document.getElementById('zoom-control').addEventListener('dblclick', () => applyZoom(1));
+{
+  const saved = Number(localStorage.getItem('zoomFactor'));
+  if (saved && saved !== 1) applyZoom(saved);
+}
+
+// ---------------------------------------------------------------------------
 // Wire up menu events from main
 // ---------------------------------------------------------------------------
 // Files can arrive (macOS "Open With") before init() has restored the
@@ -1146,6 +1169,7 @@ if (window.api) {
   window.api.on('menu:viewMode', (mode) => setViewMode(mode));
   window.api.on('menu:toggleLineNumbers', () => toggleLineNumbers());
   window.api.on('menu:toggleLineWrap', () => toggleLineWrap());
+  window.api.on('menu:zoom', (dir) => applyZoom(dir === 'reset' ? 1 : zoomFactor + (dir === 'in' ? 0.1 : -0.1)));
   window.api.on('menu:exportPdf', () => exportPdf());
 }
 
