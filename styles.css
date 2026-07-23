@@ -211,6 +211,43 @@ html, body {
 }
 
 #editor-pane { flex: 1 1 50%; }
+
+#outline-pane {
+  flex: 0 0 192px;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+  background: var(--preview-bg);
+  padding: 8px 6px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  user-select: none;
+}
+#outline-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 2px 8px 6px;
+}
+.outline-item {
+  padding: 3px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--fg);
+}
+.outline-item:hover { background: rgba(127, 127, 127, 0.14); }
+.outline-item.active { color: var(--accent); }
+.outline-item[data-level="1"] { font-weight: 600; }
+.outline-item[data-level="2"] { padding-left: 20px; }
+.outline-item[data-level="3"] { padding-left: 32px; }
+.outline-item[data-level="4"] { padding-left: 44px; }
+.outline-item[data-level="5"] { padding-left: 56px; }
+.outline-item[data-level="6"] { padding-left: 68px; }
+.outline-empty { color: var(--muted); padding: 4px 8px; }
 #preview-pane { flex: 1 1 50%; background: var(--preview-bg); border-left: 1px solid var(--border); }
 
 #divider {

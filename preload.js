@@ -18,6 +18,7 @@ const incoming = [
   'menu:toggleLineNumbers',
   'menu:toggleLineWrap',
   'menu:exportPdf',
+  'menu:toggleOutline',
 ];
 
 contextBridge.exposeInMainWorld('api', {

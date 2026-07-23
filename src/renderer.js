@@ -154,8 +154,10 @@ let lineWrap = true;
 const editorParent = document.getElementById('editor');
 
 const updateListener = EditorView.updateListener.of((v) => {
+  if (v.selectionSet && !v.docChanged) updateOutlineActive();
   if (v.docChanged) {
     schedulePreview();
+    scheduleOutline();
     const tab = tabs[active];
     if (tab) {
       if (tab.kind === 'scratch') {
@@ -403,6 +405,7 @@ function activateTab() {
   updateStatus();
   notifyState();
   renderPreview();
+  if (showOutline) renderOutline();
   refreshActiveBaseDir();
   saveSession();
   view.focus();
@@ -619,6 +622,84 @@ function resolveLocalImages(root = previewEl) {
       : (base ? `${base.replace(/\/$/, '')}/${rel}` : null);
     if (abs) img.src = `asset://local/${encodeURIComponent(abs)}`;
   }
+}
+
+// ---- Outline sidebar --------------------------------------------------------
+// A left pane listing the note's ATX headings; click to jump. Rebuilt
+// (debounced) as the doc changes; the item containing the cursor is marked.
+const outlinePane = document.getElementById('outline-pane');
+const outlineEl = document.getElementById('outline');
+let showOutline = false;
+let outlineTimer = null;
+
+function outlineHeadings() {
+  const doc = view.state.doc;
+  const items = [];
+  let inFence = false;
+  for (let n = 1; n <= doc.lines; n++) {
+    const text = doc.line(n).text;
+    if (/^\s{0,3}(```|~~~)/.test(text)) { inFence = !inFence; continue; }
+    if (inFence) continue;
+    const m = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(text);
+    if (m) items.push({ level: m[1].length, text: m[2], line: n });
+  }
+  return items;
+}
+
+function scheduleOutline() {
+  if (!showOutline) return;
+  if (outlineTimer) clearTimeout(outlineTimer);
+  outlineTimer = setTimeout(renderOutline, 150);
+}
+
+function renderOutline() {
+  outlineTimer = null;
+  if (!showOutline) return;
+  outlineEl.textContent = '';
+  const items = outlineHeadings();
+  if (!items.length) {
+    const empty = document.createElement('div');
+    empty.className = 'outline-empty';
+    empty.textContent = 'No headings yet';
+    outlineEl.append(empty);
+    return;
+  }
+  for (const it of items) {
+    const el = document.createElement('div');
+    el.className = 'outline-item';
+    el.dataset.level = it.level;
+    el.dataset.line = it.line;
+    el.textContent = it.text;
+    el.title = it.text;
+    el.addEventListener('click', () => {
+      const line = view.state.doc.line(Math.min(it.line, view.state.doc.lines));
+      view.dispatch({
+        selection: { anchor: line.from },
+        effects: EditorView.scrollIntoView(line.from, { y: 'start', yMargin: 8 }),
+      });
+      view.focus();
+    });
+    outlineEl.append(el);
+  }
+  updateOutlineActive();
+}
+
+// Mark the heading whose section contains the cursor.
+function updateOutlineActive() {
+  if (!showOutline) return;
+  const cur = view.state.doc.lineAt(view.state.selection.main.head).number;
+  let hit = null;
+  for (const el of outlineEl.querySelectorAll('.outline-item')) {
+    el.classList.remove('active');
+    if (Number(el.dataset.line) <= cur) hit = el;
+  }
+  if (hit) hit.classList.add('active');
+}
+
+function toggleOutline() {
+  showOutline = !showOutline;
+  outlinePane.hidden = !showOutline;
+  if (showOutline) renderOutline();
 }
 
 // ---- Export as PDF ----------------------------------------------------------
@@ -1147,6 +1228,7 @@ if (window.api) {
   window.api.on('menu:toggleLineNumbers', () => toggleLineNumbers());
   window.api.on('menu:toggleLineWrap', () => toggleLineWrap());
   window.api.on('menu:exportPdf', () => exportPdf());
+  window.api.on('menu:toggleOutline', () => toggleOutline());
 }
 
 // ---------------------------------------------------------------------------

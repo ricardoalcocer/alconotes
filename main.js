@@ -740,6 +740,7 @@ function buildMenu() {
     {
       label: 'View',
       submenu: [
+        { label: 'Toggle Outline', accelerator: 'CmdOrCtrl+Shift+O', click: () => sendToFocused('menu:toggleOutline') },
         { label: 'Toggle Preview', accelerator: 'CmdOrCtrl+Shift+P', click: () => sendToFocused('menu:togglePreview') },
         { label: 'Editor Only', accelerator: 'CmdOrCtrl+Shift+E', click: () => sendToFocused('menu:viewMode', 'editor') },
         { label: 'Preview Only', accelerator: 'CmdOrCtrl+Shift+R', click: () => sendToFocused('menu:viewMode', 'preview') },
