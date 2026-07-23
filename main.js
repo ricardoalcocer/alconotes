@@ -795,6 +795,14 @@ function buildMenu() {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
+// The native About panel (Buffer > About Buffer) reports the real version.
+app.setAboutPanelOptions({
+  applicationName: 'Buffer',
+  applicationVersion: app.getVersion(),
+  copyright: '© Ricardo Alcocer · MIT · alco.mit-license.org',
+  credits: 'Built with ☕ and Markdown during a roadtrip through Park City, Bryce Canyon, Lone Rock and Mesa Verde.',
+});
+
 app.whenReady().then(() => {
   appReady = true;
 
