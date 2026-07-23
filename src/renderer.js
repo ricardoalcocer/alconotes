@@ -1137,11 +1137,19 @@ function applyFormat(kind) {
 const workspace = document.getElementById('workspace');
 const previewBtn = document.getElementById('toggle-preview');
 let viewMode = 'editor'; // split | editor | preview
-let lastPreviewMode = 'split'; // remembers split vs preview-only when toggling back on
+// Remembers split vs preview-only when toggling back on — across launches,
+// so the Preview button behaves the same on a fresh launch as it did in the
+// last session.
+let lastPreviewMode = ['split', 'preview'].includes(localStorage.getItem('previewMode'))
+  ? localStorage.getItem('previewMode')
+  : 'split';
 
 function setViewMode(mode) {
   viewMode = mode;
-  if (mode !== 'editor') lastPreviewMode = mode;
+  if (mode !== 'editor') {
+    lastPreviewMode = mode;
+    localStorage.setItem('previewMode', mode);
+  }
   workspace.classList.remove('view-split', 'view-editor', 'view-preview');
   workspace.classList.add(`view-${mode}`);
   const previewVisible = mode !== 'editor';
