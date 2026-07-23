@@ -8,6 +8,11 @@ Every PR bumps the version and adds an entry — minor for features, patch for f
 > when versioning discipline was introduced in 0.18.0 (#23): each feature PR
 > counted as a minor bump, each fix as a patch, dated by its actual merge.
 
+## [0.20.1] — 2026-07-23
+- Fixed: more breathing room between the traffic lights and the tab bar — the
+  title bar drag strip grew from 30px to 38px, matching native macOS chrome
+  proportions (#27)
+
 ## [0.20.0] — 2026-07-23
 - **Menu bar icon toggles the window** — click hides Buffer if it's showing,
   summons it if not (#26)
