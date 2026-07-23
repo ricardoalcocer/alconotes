@@ -405,6 +405,16 @@ function showWindow() {
   }
 }
 
+// Tray click toggles the window: hide it if it's showing, summon it if not
+// (recreating from the saved session if it was closed).
+function toggleWindow() {
+  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible()) {
+    mainWindow.hide();
+  } else {
+    showWindow();
+  }
+}
+
 function createTray() {
   tray = new Tray(path.join(__dirname, 'assets', 'trayTemplate.png'));
   tray.setToolTip('Buffer');
@@ -417,7 +427,7 @@ function createTray() {
     { type: 'separator' },
     { label: 'Quit Buffer', role: 'quit' },
   ]);
-  tray.on('click', () => showWindow());
+  tray.on('click', () => toggleWindow());
   tray.on('right-click', () => tray.popUpContextMenu(menu));
 }
 

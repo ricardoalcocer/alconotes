@@ -9,6 +9,8 @@ Every PR bumps the version and adds an entry — minor for features, patch for f
 > counted as a minor bump, each fix as a patch, dated by its actual merge.
 
 ## [0.20.0] — 2026-07-23
+- **Menu bar icon toggles the window** — click hides Buffer if it's showing,
+  summons it if not (#26)
 - **Split-view scroll sync** — the editor and preview follow each other while
   scrolling, mapped through source lines (#26)
 - **Split View menu item** (⌘⇧D, toggles back to editor) — split was previously

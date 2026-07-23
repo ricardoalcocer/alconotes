@@ -60,7 +60,7 @@ left off.
 | 🖍 **Highlights** | Bear-style `==highlighted text==` renders as a real highlight — in the preview and in exported PDFs. `⌘⇧H` wraps the selection. |
 | 🖼 **Drag & drop images** | Drop or paste an image into the editor — it's copied into a sidecar assets folder next to your note and inserted as plain Markdown. |
 | 📂 **Opens from Finder** | Registered as a Markdown editor — right-click a `.md` file → **Open With → Buffer**, or make it the default (Get Info → Change All…). |
-| 🚥 **Lives in your menu bar** | Closing the window doesn't kill your flow — Buffer keeps running with a menu bar icon. One click summons the notebook right back. |
+| 🚥 **Lives in your menu bar** | Closing the window doesn't kill your flow — Buffer keeps running with a menu bar icon. Click toggles the notebook: summon it from anywhere, click again to tuck it away. |
 | 📌 **Always on Top** | Pin the notebook over every other window — **Window → Always on Top** (`⌘⌥T`), remembered across launches. |
 | 🛟 **Automatic backups** | Notebooks are snapshotted hourly (and at every launch), and closing a notebook tab moves it to a trash folder instead of deleting it. **File → Open Backups Folder** takes you there. |
 | 🔎 **Find & Replace** | `⌘F` / `⌘⌥F` powered by CodeMirror's search. |
