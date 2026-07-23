@@ -21,14 +21,23 @@
     },
     "fileAssociations": [
       {
-        "ext": ["md", "markdown", "mdown", "mkd", "mdtext"],
+        "ext": [
+          "md",
+          "markdown",
+          "mdown",
+          "mkd",
+          "mdtext"
+        ],
         "name": "Markdown Document",
         "description": "Markdown Document",
         "role": "Editor",
         "rank": "Default"
       },
       {
-        "ext": ["txt", "text"],
+        "ext": [
+          "txt",
+          "text"
+        ],
         "name": "Plain Text Document",
         "description": "Plain Text Document",
         "role": "Editor",
@@ -75,6 +84,7 @@
     "@codemirror/view": "^6.28.0",
     "@lezer/highlight": "^1.2.0",
     "codemirror": "^6.0.1",
-    "markdown-it": "^14.1.0"
+    "markdown-it": "^14.1.0",
+    "markdown-it-mark": "^4.0.0"
   }
 }
