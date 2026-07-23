@@ -45,7 +45,7 @@ html, body {
 
 /* Reserve space for the macOS traffic lights (hiddenInset title bar). */
 #titlebar-drag {
-  height: 30px;
+  height: 38px;
   flex: 0 0 auto;
   -webkit-app-region: drag;
   background: var(--bg);

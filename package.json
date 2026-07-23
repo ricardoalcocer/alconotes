@@ -1,7 +1,7 @@
 {
   "name": "alconotes",
   "productName": "Buffer",
-  "version": "0.20.0",
+  "version": "0.20.1",
   "description": "A perpetual Markdown notebook — a fast, native-feeling editor in the spirit of CotEditor",
   "main": "main.js",
   "author": "alco",
