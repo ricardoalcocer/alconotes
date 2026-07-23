@@ -972,6 +972,7 @@ function notifyState() {
       title: tab.name,
       filePath: tab.kind === 'file' ? tab.path : null,
       dirtyFiles,
+      viewMode,
     });
   }
 }
@@ -1235,6 +1236,7 @@ function setViewMode(mode) {
   const previewVisible = mode !== 'editor';
   if (previewBtn) previewBtn.setAttribute('aria-pressed', String(previewVisible));
   if (previewVisible) renderPreview();
+  notifyState(); // keeps the View menu's mode checkmark current
 }
 
 function togglePreview() {
@@ -1353,7 +1355,8 @@ if (window.api) {
   window.api.on('menu:replace', () => openSearchPanel(view));
   window.api.on('menu:format', (kind) => applyFormat(kind));
   window.api.on('menu:togglePreview', () => togglePreview());
-  window.api.on('menu:viewMode', (mode) => setViewMode(mode));
+  window.api.on('menu:viewMode', (mode) => setViewMode(
+    mode === 'split' && viewMode === 'split' ? 'editor' : mode));
   window.api.on('menu:toggleLineNumbers', () => toggleLineNumbers());
   window.api.on('menu:toggleLineWrap', () => toggleLineWrap());
   window.api.on('menu:exportPdf', () => exportPdf());

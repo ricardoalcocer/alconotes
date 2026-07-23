@@ -637,6 +637,9 @@ ipcMain.on('doc:state', (event, payload) => {
   win.setDocumentEdited(dirtyFiles.length > 0);
   win.setRepresentedFilename(typeof payload.filePath === 'string' ? payload.filePath : '');
   win.setTitle(String(payload.title || 'Buffer'));
+  const menu = Menu.getApplicationMenu();
+  const modeItem = menu && menu.getMenuItemById(`view-${payload.viewMode}`);
+  if (modeItem) modeItem.checked = true;
 });
 
 // Renderer asks main to finish closing (after save-all triggered by close).
@@ -743,9 +746,9 @@ function buildMenu() {
       submenu: [
         { label: 'Toggle Outline', accelerator: 'CmdOrCtrl+Shift+O', click: () => sendToFocused('menu:toggleOutline') },
         { label: 'Toggle Preview', accelerator: 'CmdOrCtrl+Shift+P', click: () => sendToFocused('menu:togglePreview') },
-        { label: 'Editor Only', accelerator: 'CmdOrCtrl+Shift+E', click: () => sendToFocused('menu:viewMode', 'editor') },
-        { label: 'Split View', accelerator: 'CmdOrCtrl+Shift+D', click: () => sendToFocused('menu:viewMode', 'split') },
-        { label: 'Preview Only', accelerator: 'CmdOrCtrl+Shift+R', click: () => sendToFocused('menu:viewMode', 'preview') },
+        { id: 'view-editor', label: 'Editor Only', type: 'radio', checked: true, accelerator: 'CmdOrCtrl+Shift+E', click: () => sendToFocused('menu:viewMode', 'editor') },
+        { id: 'view-split', label: 'Split View', type: 'radio', accelerator: 'CmdOrCtrl+Shift+D', click: () => sendToFocused('menu:viewMode', 'split') },
+        { id: 'view-preview', label: 'Preview Only', type: 'radio', accelerator: 'CmdOrCtrl+Shift+R', click: () => sendToFocused('menu:viewMode', 'preview') },
         { type: 'separator' },
         {
           label: 'Appearance',

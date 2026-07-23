@@ -11,8 +11,9 @@ Every PR bumps the version and adds an entry — minor for features, patch for f
 ## [0.20.0] — 2026-07-23
 - **Split-view scroll sync** — the editor and preview follow each other while
   scrolling, mapped through source lines (#26)
-- **Split View menu item** (⌘⇧D) — split was previously only reachable via the
-  Preview toggle's default (#26)
+- **Split View menu item** (⌘⇧D, toggles back to editor) — split was previously
+  only reachable via the Preview toggle's default; the View menu now checkmarks
+  the active mode (#26)
 - Fixed: the status bar Preview button forgot your preferred layout on relaunch —
   it always opened a split until ⌘⇧E/⌘⇧R had been used once. The split vs
   preview-only choice is now remembered across launches (#26)
