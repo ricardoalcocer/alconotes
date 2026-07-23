@@ -14,6 +14,9 @@ Every PR bumps the version and adds an entry — minor for features, patch for f
   preview-only choice is now remembered across launches (#26)
 - Fixed: outline clicks now scroll the preview too — in preview-only mode they
   previously only moved the hidden editor, so nothing visibly happened (#26)
+- Added: explicit **Split View** menu item (⌘⇧D) — split was previously only
+  reachable via the Preview toggle's default, which the layout memory above
+  would otherwise lock out (#26)
 
 ## [0.19.0] — 2026-07-22
 - **Outline sidebar** (⌘⇧O, or the toolbar's sidebar button) — the note's heading

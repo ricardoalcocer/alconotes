@@ -744,6 +744,7 @@ function buildMenu() {
         { label: 'Toggle Outline', accelerator: 'CmdOrCtrl+Shift+O', click: () => sendToFocused('menu:toggleOutline') },
         { label: 'Toggle Preview', accelerator: 'CmdOrCtrl+Shift+P', click: () => sendToFocused('menu:togglePreview') },
         { label: 'Editor Only', accelerator: 'CmdOrCtrl+Shift+E', click: () => sendToFocused('menu:viewMode', 'editor') },
+        { label: 'Split View', accelerator: 'CmdOrCtrl+Shift+D', click: () => sendToFocused('menu:viewMode', 'split') },
         { label: 'Preview Only', accelerator: 'CmdOrCtrl+Shift+R', click: () => sendToFocused('menu:viewMode', 'preview') },
         { type: 'separator' },
         {

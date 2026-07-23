@@ -124,7 +124,7 @@ close), so they survive quits without a save.
 | Bulleted list | `⌘⇧8` | | Numbered list | `⌘⇧7` |
 | Blockquote | `⌘⇧.` | | Image | `⌘⇧I` |
 | Table | `⌘⇧T` | | Checkbox | `⌘⇧X` |
-| Highlight | `⌘⇧H` | | | |
+| Highlight | `⌘⇧H` | | Split View | `⌘⇧D` |
 | Close Tab | `⌘W` | | Go to Tab 1–9 | `⌘1`–`⌘9` (`⌘9` = last) |
 | Export as PDF | `⌘⌥P` | | Always on Top | `⌘⌥T` |
 | Toggle Outline | `⌘⇧O` | | | |
